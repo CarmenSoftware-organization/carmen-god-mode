@@ -28,7 +28,7 @@ The `CARMEN_SYSTEM.tb_god_mode_audit` table is created automatically on the firs
 (`prisma migrate deploy`, `db:tenant-views:apply`, `db:seed.*`). It requires:
 
 - `PLATFORM_PACKAGE_DIR` — path to the package (defaults to
-  `../carmen-turborepo-backend-v2/packages/prisma-shared-schema-platform`).
+  `../carmen-turborepo-backend/packages/prisma-shared-schema-platform`).
   The repo must be checked out with `node_modules` installed; `bun` and (for
   tenant views) `psql` must be on PATH.
 - `SYSTEM_DIRECT_URL` — Prisma `directUrl` (non-pooled) for migrations/seeds.
