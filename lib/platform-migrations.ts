@@ -44,7 +44,6 @@ export const CATALOG: CatalogOp[] = [
   seed("seed-platform-role", "db:seed.backstage-role", "Seed: platform roles"),
   seed("seed-platform-role-permission", "db:seed.backstage-role-permission", "Seed: platform role permissions"),
   seed("seed-platform-super-admin", "db:seed.backstage-super-admin", "Seed: platform super admin"),
-  seed("seed-report-template-upload", "db:seed.report-template-upload", "Seed: report template uploads"),
   seed("seed-license-feature", "db:seed.license-feature", "Seed: license features"),
 
   check("check-permission", "db:check.permission", "Check: permission drift"),

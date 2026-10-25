@@ -50,8 +50,6 @@ const UNSURFACED: Record<string, string> = {
     "20260813010000_database_pool_drop_db_connection removed the column it reads",
   "db:backfill.subscription":
     "scan-only until --apply; surfacing it needs an apply toggle in the catalog and UI first",
-  "db:backfill.bu-license":
-    "scan-only until --apply; surfacing it needs an apply toggle in the catalog and UI first",
 };
 
 test.skipIf(!scripts)(
