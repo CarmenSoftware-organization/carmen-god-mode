@@ -31,7 +31,6 @@ jobs:
             export PATH="/usr/local/bin:/usr/bin:$PATH"
             DIR=/root/carmen-god-mode
             SVC=carmen-god-mode
-            PORT=9903
             cd "$DIR"
 
             # .env ไม่อยู่ใน git (มี GOD_MODE_PASSWORD, SESSION_SECRET และ DB URL)
@@ -60,11 +59,15 @@ jobs:
             fi
 
             echo "=== [4/4] Restart + health ==="
+            # ยิง Next.js ตรง ๆ ที่พอร์ตใน .env (init script bind 127.0.0.1) — 9903 คือ nginx
+            # ที่เปิด TLS จึงตอบ 301 ให้ http://localhost:9903 เสมอ health check เลยแดงทุก run
+            PORT=$(sed -n 's/^PORT=//p' .env | tr -d '"\r' | tail -1)
+            PORT=${PORT:-3903}
             rc-service "$SVC" restart
             ok=""
             i=1
             while [ "$i" -le 20 ]; do
-              code=$(wget -qS -O /dev/null "http://localhost:$PORT/login" 2>&1 | grep -m1 HTTP | awk '{print $2}')
+              code=$(wget -qS -O /dev/null "http://127.0.0.1:$PORT/login" 2>&1 | grep -m1 HTTP | awk '{print $2}')
               if [ "$code" = "200" ]; then ok=1; break; fi
               sleep 1
               i=$((i + 1))
