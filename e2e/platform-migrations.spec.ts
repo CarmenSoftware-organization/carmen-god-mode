@@ -7,7 +7,7 @@ const pkgDir =
   process.env.PLATFORM_PACKAGE_DIR ??
   path.resolve(
     process.cwd(),
-    "../carmen-turborepo-backend-v2/packages/prisma-shared-schema-platform",
+    "../carmen-turborepo-backend/packages/prisma-shared-schema-platform",
   );
 
 test.skip(
