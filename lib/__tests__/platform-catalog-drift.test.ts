@@ -48,8 +48,13 @@ const UNSURFACED: Record<string, string> = {
   "db:migrate.database-pool":
     "one-off backfill; upstream documents the scan/--apply path as dead once migration " +
     "20260813010000_database_pool_drop_db_connection removed the column it reads",
-  "db:backfill.subscription":
-    "scan-only until --apply; surfacing it needs an apply toggle in the catalog and UI first",
+  "check-types": "not a database operation",
+  "db:check.backstage-permission-resource":
+    "static file check with no database connection — the root audit:backstage-permission-resource gate runs it",
+  "db:retire.dead-app-api":
+    "one-off maintenance, dry-run unless --apply; surfacing it needs an apply toggle in the catalog and UI first",
+  "db:seed.dashboard-widget-template":
+    "not surfaced by the upstream backstage seed console either; run by hand after a widget-template change",
 };
 
 test.skipIf(!scripts)(
