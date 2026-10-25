@@ -17,7 +17,7 @@ export async function assertPackageDir(): Promise<void> {
   try {
     await fs.access(path.join(dir, "package.json"));
   } catch {
-    throw new Error(`Platform package not found at ${dir} (set PLATFORM_PACKAGE_DIR)`);
+    throw new Error(`Platform package not found at ${dir} (set BACKSTAGE_PACKAGE_DIR)`);
   }
 }
 
