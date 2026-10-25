@@ -72,8 +72,8 @@ async function gatewayLogin(username: string, password: string): Promise<string>
   return parsed.data.access_token;
 }
 
-async function fetchPlatformPermission(token: string): Promise<boolean> {
-  const res = await apiFetch("/api/user/permission/platform", {
+async function fetchBackstagePermission(token: string): Promise<boolean> {
+  const res = await apiFetch("/api/user/permission/backstage", {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -86,7 +86,7 @@ async function fetchPlatformPermission(token: string): Promise<boolean> {
 export async function verifySuperAdmin(username: string, password: string): Promise<SuperAdminResult> {
   try {
     const token = await gatewayLogin(username, password);
-    const isSuperAdmin = await fetchPlatformPermission(token);
+    const isSuperAdmin = await fetchBackstagePermission(token);
     return isSuperAdmin ? { ok: true, actor: username } : { ok: false, reason: "not_super_admin" };
   } catch (e) {
     if (e instanceof GatewayError) return { ok: false, reason: e.reason };
