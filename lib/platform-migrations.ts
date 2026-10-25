@@ -45,12 +45,14 @@ export const CATALOG: CatalogOp[] = [
   seed("seed-platform-role-permission", "db:seed.backstage-role-permission", "Seed: platform role permissions"),
   seed("seed-platform-super-admin", "db:seed.backstage-super-admin", "Seed: platform super admin"),
   seed("seed-license-feature", "db:seed.license-feature", "Seed: license features"),
+  seed("seed-application-api", "db:seed.application-api", "Seed: application x-app-id grants (add-only)"),
 
   check("check-permission", "db:check.permission", "Check: permission drift"),
   check("check-platform-permission", "db:check.backstage-permission", "Check: platform permission drift"),
   check("check-platform-role-permission", "db:check.backstage-role-permission", "Check: platform role-permission drift"),
   check("check-endpoint-permission", "db:check.endpoint-permission", "Check: endpoint permission coverage"),
   check("check-api-system-permission", "db:check.api-system-permission", "Check: api-system platform permission coverage"),
+  check("check-application-api", "db:check.application-api", "Check: application x-app-id grant drift"),
 
   // Not check(): this one writes real rows (deleteMany + create on a live BU's licences)
   // inside a transaction it always rolls back. Zero net effect, but it takes row locks on
