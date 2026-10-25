@@ -6,7 +6,7 @@ import { env } from "@/lib/env";
 
 const execFileP = promisify(execFile);
 
-export const DEFAULT_REL = "../carmen-turborepo-backend/packages/prisma-shared-schema-platform";
+export const DEFAULT_REL = "../carmen-turborepo-backend/packages/prisma-shared-schema-backstage";
 
 export function packageDir(): string {
   return env().platformPackageDir ?? path.resolve(process.cwd(), DEFAULT_REL);

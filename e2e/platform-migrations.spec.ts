@@ -7,7 +7,7 @@ const pkgDir =
   process.env.BACKSTAGE_PACKAGE_DIR ??
   path.resolve(
     process.cwd(),
-    "../carmen-turborepo-backend/packages/prisma-shared-schema-platform",
+    "../carmen-turborepo-backend/packages/prisma-shared-schema-backstage",
   );
 
 test.skip(
