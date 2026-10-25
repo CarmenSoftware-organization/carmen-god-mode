@@ -31,7 +31,7 @@ test("drift-check ops are read-only (no confirm needed)", () => {
 
 test("catalog does not offer ops whose scripts are absent from the package", () => {
   // These reference db:* scripts that don't exist in
-  // @repo/prisma-shared-schema-platform, so running them can only fail.
+  // @repo/prisma-shared-schema-backstage, so running them can only fail.
   expect(findOp("seed-application")).toBeUndefined();
   expect(findOp("mock-reset")).toBeUndefined();
   expect(findOp("seed")).toBeUndefined();

@@ -22,7 +22,7 @@ export default async function PlatformMigrationsPage() {
       <div className="space-y-1">
         <h1 className="text-base font-semibold tracking-tight">Platform migrations</h1>
         <p className="max-w-2xl text-sm text-foreground-muted">
-          Runs migration scripts of <code className="font-mono">@repo/prisma-shared-schema-platform</code>{" "}
+          Runs migration scripts of <code className="font-mono">@repo/prisma-shared-schema-backstage</code>{" "}
           against the database this instance manages, by spawning the package&apos;s own commands. Pick
           the target schema below. Output streams live.
         </p>

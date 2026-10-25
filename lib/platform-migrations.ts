@@ -39,17 +39,17 @@ export const CATALOG: CatalogOp[] = [
 
   seed("seed-currency-iso", "db:seed.currency-iso", "Seed: currency ISO codes"),
   seed("seed-permission", "db:seed.permission", "Seed: permission catalog"),
-  seed("seed-platform-permission", "db:seed.platform-permission", "Seed: platform permissions"),
+  seed("seed-platform-permission", "db:seed.backstage-permission", "Seed: platform permissions"),
   seed("seed-role-permission", "db:seed.role-permission", "Seed: role permissions"),
-  seed("seed-platform-role", "db:seed.platform-role", "Seed: platform roles"),
-  seed("seed-platform-role-permission", "db:seed.platform-role-permission", "Seed: platform role permissions"),
-  seed("seed-platform-super-admin", "db:seed.platform-super-admin", "Seed: platform super admin"),
+  seed("seed-platform-role", "db:seed.backstage-role", "Seed: platform roles"),
+  seed("seed-platform-role-permission", "db:seed.backstage-role-permission", "Seed: platform role permissions"),
+  seed("seed-platform-super-admin", "db:seed.backstage-super-admin", "Seed: platform super admin"),
   seed("seed-report-template-upload", "db:seed.report-template-upload", "Seed: report template uploads"),
   seed("seed-license-feature", "db:seed.license-feature", "Seed: license features"),
 
   check("check-permission", "db:check.permission", "Check: permission drift"),
-  check("check-platform-permission", "db:check.platform-permission", "Check: platform permission drift"),
-  check("check-platform-role-permission", "db:check.platform-role-permission", "Check: platform role-permission drift"),
+  check("check-platform-permission", "db:check.backstage-permission", "Check: platform permission drift"),
+  check("check-platform-role-permission", "db:check.backstage-role-permission", "Check: platform role-permission drift"),
   check("check-endpoint-permission", "db:check.endpoint-permission", "Check: endpoint permission coverage"),
   check("check-api-system-permission", "db:check.api-system-permission", "Check: api-system platform permission coverage"),
 
