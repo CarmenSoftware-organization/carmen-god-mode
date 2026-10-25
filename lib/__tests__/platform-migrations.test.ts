@@ -10,7 +10,7 @@ test("catalog exposes the expected operation ids across groups", () => {
     "prisma-status", "prisma-deploy",
     "tenant-apply", "tenant-revert",
     "seed-currency-iso", "seed-permission", "seed-platform-super-admin",
-    "seed-platform-role", "seed-report-template-upload",
+    "seed-platform-role",
     "check-permission", "check-platform-permission", "check-platform-role-permission", "check-endpoint-permission",
     "check-api-system-permission",
     "migrate-reset",
