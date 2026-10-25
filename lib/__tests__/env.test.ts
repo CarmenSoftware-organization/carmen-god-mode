@@ -58,7 +58,7 @@ test("systemDirectUrl uses SYSTEM_DIRECT_URL when present", () => {
 
 test("platformPackageDir is undefined by default and passes through when set", () => {
   expect(loadEnv(base).platformPackageDir).toBeUndefined();
-  expect(loadEnv({ ...base, PLATFORM_PACKAGE_DIR: "/x/pkg" }).platformPackageDir).toBe("/x/pkg");
+  expect(loadEnv({ ...base, BACKSTAGE_PACKAGE_DIR: "/x/pkg" }).platformPackageDir).toBe("/x/pkg");
 });
 
 test("allowDangerOps only true for the literal string 'true'", () => {

@@ -12,7 +12,7 @@ const base = {
 };
 
 beforeEach(() => { Object.assign(process.env, base); });
-afterEach(() => { vi.resetModules(); for (const k of ["SYSTEM_DIRECT_URL", "PLATFORM_PACKAGE_DIR"]) delete process.env[k]; });
+afterEach(() => { vi.resetModules(); for (const k of ["SYSTEM_DIRECT_URL", "BACKSTAGE_PACKAGE_DIR"]) delete process.env[k]; });
 
 test("targetDbInfo parses host/database/schema and masks the password", async () => {
   vi.resetModules();
@@ -48,13 +48,13 @@ test("buildSubprocessEnv injects ?schema= into both URLs and sets SYSTEM_SCHEMA_
 test("assertPackageDir resolves when package.json exists and throws otherwise", async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), "pkg-"));
   await fs.writeFile(path.join(dir, "package.json"), "{}");
-  process.env.PLATFORM_PACKAGE_DIR = dir;
+  process.env.BACKSTAGE_PACKAGE_DIR = dir;
   vi.resetModules();
   const { assertPackageDir, packageDir } = await import("@/lib/platform-package");
   expect(packageDir()).toBe(dir);
   await expect(assertPackageDir()).resolves.toBeUndefined();
 
-  process.env.PLATFORM_PACKAGE_DIR = path.join(dir, "does-not-exist");
+  process.env.BACKSTAGE_PACKAGE_DIR = path.join(dir, "does-not-exist");
   vi.resetModules();
   const mod = await import("@/lib/platform-package");
   await expect(mod.assertPackageDir()).rejects.toThrow(/not found/);
@@ -66,7 +66,7 @@ test("listTenantFiles returns sorted *.up.sql basenames", async () => {
   await fs.writeFile(path.join(dir, "migrations", "tenant", "002_b.up.sql"), "");
   await fs.writeFile(path.join(dir, "migrations", "tenant", "001_a.up.sql"), "");
   await fs.writeFile(path.join(dir, "migrations", "tenant", "001_a.down.sql"), "");
-  process.env.PLATFORM_PACKAGE_DIR = dir;
+  process.env.BACKSTAGE_PACKAGE_DIR = dir;
   vi.resetModules();
   const { listTenantFiles } = await import("@/lib/platform-package");
   expect(await listTenantFiles()).toEqual(["001_a.up.sql", "002_b.up.sql"]);
@@ -78,7 +78,7 @@ test("readPackageScripts returns the scripts map from package.json", async () =>
     path.join(dir, "package.json"),
     JSON.stringify({ scripts: { "db:seed": "ts-node prisma/seed.ts" } }),
   );
-  process.env.PLATFORM_PACKAGE_DIR = dir;
+  process.env.BACKSTAGE_PACKAGE_DIR = dir;
   vi.resetModules();
   const { readPackageScripts } = await import("@/lib/platform-package");
   expect(await readPackageScripts()).toEqual({ "db:seed": "ts-node prisma/seed.ts" });
@@ -86,7 +86,7 @@ test("readPackageScripts returns the scripts map from package.json", async () =>
 
 test("readPackageScripts returns null when package.json is absent", async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), "pkg-"));
-  process.env.PLATFORM_PACKAGE_DIR = dir;
+  process.env.BACKSTAGE_PACKAGE_DIR = dir;
   vi.resetModules();
   const { readPackageScripts } = await import("@/lib/platform-package");
   expect(await readPackageScripts()).toBeNull();
@@ -95,7 +95,7 @@ test("readPackageScripts returns null when package.json is absent", async () => 
 test("readPackageScripts returns null when package.json has no scripts key", async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), "pkg-"));
   await fs.writeFile(path.join(dir, "package.json"), "{}");
-  process.env.PLATFORM_PACKAGE_DIR = dir;
+  process.env.BACKSTAGE_PACKAGE_DIR = dir;
   vi.resetModules();
   const { readPackageScripts } = await import("@/lib/platform-package");
   expect(await readPackageScripts()).toBeNull();

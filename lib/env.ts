@@ -13,7 +13,7 @@ const schema = z.object({
   BACKEND_API_APP_ID: z.string().min(1).default("42ab2083-5dbd-47fc-bb32-3de97dc0cd89"),
   BACKEND_API_INSECURE_TLS: z.string().optional(),
   SYSTEM_DIRECT_URL: z.string().min(1).optional(),
-  PLATFORM_PACKAGE_DIR: z.string().min(1).optional(),
+  BACKSTAGE_PACKAGE_DIR: z.string().min(1).optional(),
   ALLOW_DANGER_OPS: z.string().optional(),
 });
 
@@ -51,7 +51,7 @@ export function loadEnv(raw: Record<string, string | undefined>): Env {
     backendApiInsecureTls: p.BACKEND_API_INSECURE_TLS === "true",
     gatewayEnabled: !!p.BACKEND_API_BASE_URL,
     systemDirectUrl: p.SYSTEM_DIRECT_URL ?? p.SYSTEM_DATABASE_URL,
-    platformPackageDir: p.PLATFORM_PACKAGE_DIR,
+    platformPackageDir: p.BACKSTAGE_PACKAGE_DIR,
     allowDangerOps: p.ALLOW_DANGER_OPS === "true",
   };
 }

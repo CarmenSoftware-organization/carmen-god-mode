@@ -6,7 +6,7 @@ import { DEFAULT_REL } from "@/lib/platform-package";
 
 // Import DEFAULT_REL to keep path in sync; module import has no env() side effect.
 function readRealScripts(): Record<string, string> | null {
-  const dir = process.env.PLATFORM_PACKAGE_DIR ?? path.resolve(process.cwd(), DEFAULT_REL);
+  const dir = process.env.BACKSTAGE_PACKAGE_DIR ?? path.resolve(process.cwd(), DEFAULT_REL);
   try {
     const raw = fs.readFileSync(path.join(dir, "package.json"), "utf8");
     const parsed = JSON.parse(raw) as { scripts?: Record<string, string> };

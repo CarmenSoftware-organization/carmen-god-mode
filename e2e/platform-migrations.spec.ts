@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 const pkgDir =
-  process.env.PLATFORM_PACKAGE_DIR ??
+  process.env.BACKSTAGE_PACKAGE_DIR ??
   path.resolve(
     process.cwd(),
     "../carmen-turborepo-backend/packages/prisma-shared-schema-platform",
@@ -12,7 +12,7 @@ const pkgDir =
 
 test.skip(
   !fs.existsSync(path.join(pkgDir, "package.json")),
-  "platform package not present — set PLATFORM_PACKAGE_DIR or check out the sibling repo",
+  "platform package not present — set BACKSTAGE_PACKAGE_DIR or check out the sibling repo",
 );
 
 // The assertions below allow 60s for a subprocess run, which the default 30s test
