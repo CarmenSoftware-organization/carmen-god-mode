@@ -114,7 +114,6 @@ test("regression: DELETE preview then apply", async () => {
   if (a.kind === "write-applied") expect(a.affected).toBe(1);
   expect(await itemCount()).toBe(2);
   expect(await auditCount()).toBe(a0 + 1);
-  expect(await itemCount()).toBe(2);
   } finally {
     await q(`INSERT INTO app.item VALUES (1,'a') ON CONFLICT DO NOTHING`);
   }
