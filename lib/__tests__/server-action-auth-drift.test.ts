@@ -92,22 +92,46 @@ export function findViolations(file: string, raw: string): string[] {
   if (!/^\s*(["'])use server\1/.test(src)) return [];
   const problems: string[] = [];
 
-  if (/\bexport\s+(const|let|var)\s+\w+[^=\n]*=\s*(async\b|\()/.test(src)) {
-    problems.push(`${file}: 'export const|let = …' is not allowed in a "use server" file; use 'export async function'`);
-  }
-  if (/\bexport\s+default\b/.test(src)) {
-    problems.push(`${file}: 'export default' is not allowed in a "use server" file`);
-  }
-  if (/\bexport\s*(type\s*)?\{/.test(src) && /\bexport\s*\{/.test(src)) {
-    problems.push(`${file}: 'export { … }' is not allowed in a "use server" file`);
+  // Only `export async function`, `export type` and `export interface` may appear:
+  // anything else (const/let/var, default, `export {}`, `export *`, wrappers) hides
+  // an action from the per-function guard below.
+  const bad = /\bexport\s+(?!async\s+function\b|type\b|interface\b)(\S+)/g;
+  let b: RegExpExecArray | null;
+  while ((b = bad.exec(src))) {
+    problems.push(`${file}: 'export ${b[1]}' is not allowed in a "use server" file; use 'export async function'`);
   }
 
-  const re = /\bexport\s+async\s+function\s+(\w+)\s*(<[^(]*>)?\s*\(/g;
+  const decl = /\bexport\s+async\s+function\b/g;
+  const total = (src.match(decl) ?? []).length;
+  let checked = 0;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(src))) {
-    const name = m[1];
+  while ((m = decl.exec(src))) {
+    const nameM = /^\s*([\w$]+)/.exec(src.slice(decl.lastIndex));
+    if (!nameM) {
+      problems.push(`${file}@${m.index}: could not read function name`);
+      continue;
+    }
+    const name = nameM[1];
+    let pos = decl.lastIndex + nameM[0].length;
+    while (/\s/.test(src[pos] ?? "")) pos++;
+    if (src[pos] === "<") {
+      let angle = 0;
+      for (; pos < src.length; pos++) {
+        if (src[pos] === "<") angle++;
+        else if (src[pos] === ">" && src[pos - 1] !== "=" && --angle === 0) {
+          pos++;
+          break;
+        }
+      }
+      while (/\s/.test(src[pos] ?? "")) pos++;
+    }
+    if (src[pos] !== "(") {
+      problems.push(`${file}#${name}: could not locate parameter list`);
+      continue;
+    }
+    checked++;
     if (ALLOWLIST[`${file}#${name}`]) continue;
-    const paramsEnd = matchParen(src, m.index + m[0].length - 1);
+    const paramsEnd = matchParen(src, pos);
     const brace = paramsEnd < 0 ? -1 : findBodyBrace(src, paramsEnd);
     if (brace < 0) {
       problems.push(`${file}#${name}: could not locate function body`);
@@ -117,6 +141,7 @@ export function findViolations(file: string, raw: string): string[] {
       problems.push(`${file}#${name}: first statement must be 'await requireAuth()'`);
     }
   }
+  if (checked !== total) problems.push(`${file}: checked ${checked} of ${total} exported async functions`);
   return problems;
 }
 
@@ -188,6 +213,23 @@ describe("server actions must authenticate first", () => {
       expect(findViolations("f.ts", `"use server";\nexport const a = async () => { await requireAuth(); };\n`)).not.toEqual([]);
       expect(findViolations("f.ts", `"use server";\nexport default async function () {}\n`)).not.toEqual([]);
       expect(findViolations("f.ts", `"use server";\nasync function a() {}\nexport { a };\n`)).not.toEqual([]);
+    });
+    test("generic with function-type constraint is still checked", () => {
+      const src = `"use server";\nexport async function a<T extends (x: number) => void>(t: T) {\n  doThing();\n}\n`;
+      expect(findViolations("f.ts", src)).toEqual(["f.ts#a: first statement must be 'await requireAuth()'"]);
+      const ok = `"use server";\nexport async function a<T extends (x: number) => void>(t: T) {\n  await requireAuth();\n}\n`;
+      expect(findViolations("f.ts", ok)).toEqual([]);
+    });
+    test("$ in function name is still checked", () => {
+      expect(findViolations("f.ts", `"use server";\nexport async function $a() {\n  doThing();\n}\n`)).toHaveLength(1);
+    });
+    test("export *, wrapped and function-expression exports are violations", () => {
+      expect(findViolations("f.ts", `"use server";\nexport * from "./x";\n`)).not.toEqual([]);
+      expect(findViolations("f.ts", `"use server";\nexport const f = wrap(async () => {});\n`)).not.toEqual([]);
+      expect(findViolations("f.ts", `"use server";\nexport const f = function () {};\n`)).not.toEqual([]);
+    });
+    test("type and interface exports are allowed", () => {
+      expect(findViolations("f.ts", `"use server";\nexport type A = number;\nexport interface B {}\n`)).toEqual([]);
     });
     test("function with no return type annotation is checked", () => {
       expect(findViolations("f.ts", `"use server";\nexport async function a() {}\n`)).toEqual([
