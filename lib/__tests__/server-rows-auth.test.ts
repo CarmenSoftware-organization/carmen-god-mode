@@ -6,11 +6,13 @@ const applyUpdate = vi.fn();
 const softDeleteRows = vi.fn();
 const restoreRows = vi.fn();
 const valuesFromForm = vi.fn();
+const describeTable = vi.fn();
 
 vi.mock("@/lib/session", () => ({ requireAuth: () => requireAuth() }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/lib/env", () => ({ env: () => ({ systemSchemaName: "CARMEN_SYSTEM", godModeUserId: null }) }));
+vi.mock("@/lib/introspect", () => ({ describeTable: (...a: unknown[]) => describeTable(...a) }));
 vi.mock("@/lib/write", () => ({
   applyInsert: (...a: unknown[]) => applyInsert(...a),
   applyUpdate: (...a: unknown[]) => applyUpdate(...a),
@@ -45,6 +47,7 @@ const calls: [string, () => Promise<unknown>][] = [
 beforeEach(() => {
   vi.clearAllMocks();
   valuesFromForm.mockResolvedValue({});
+  describeTable.mockResolvedValue({ columns: [], primaryKey: ["id"] });
 });
 
 describe("row actions require auth", () => {
@@ -68,6 +71,27 @@ describe("hostile pkJson", () => {
   test("submitClusterUpdate rejects non-JSON pk", async () => {
     await expect(clusters.submitClusterUpdate("not json", fd())).rejects.toThrow(/invalid primary key/i);
     expect(applyUpdate).not.toHaveBeenCalled();
+  });
+});
+
+describe("tampered pkJson with real non-PK columns", () => {
+  beforeEach(() => requireAuth.mockResolvedValue(undefined));
+
+  test("submitUpdate rejects pk that is not the table primary key", async () => {
+    await expect(rows.submitUpdate("app", "item", '{"status":"active"}', fd())).rejects.toThrow(/invalid primary key/i);
+    expect(applyUpdate).not.toHaveBeenCalled();
+    expect(valuesFromForm).not.toHaveBeenCalled();
+  });
+
+  test("submitClusterUpdate rejects pk that is not the table primary key", async () => {
+    await expect(clusters.submitClusterUpdate('{"status":"active"}', fd())).rejects.toThrow(/invalid primary key/i);
+    expect(applyUpdate).not.toHaveBeenCalled();
+    expect(valuesFromForm).not.toHaveBeenCalled();
+  });
+
+  test("submitUpdate accepts the exact primary key", async () => {
+    await rows.submitUpdate("app", "item", '{"id":1}', fd());
+    expect(applyUpdate).toHaveBeenCalledTimes(1);
   });
 });
 

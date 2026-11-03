@@ -39,3 +39,12 @@ export function parsePk(pkJson: string): Record<string, unknown> {
   }
   return parsed as Record<string, unknown>;
 }
+
+/** The pk must name exactly the table's primary-key columns, else a tampered pkJson could match many rows. */
+export function assertPkMatchesTable(pk: Record<string, unknown>, primaryKey: string[]): void {
+  const keys = Object.keys(pk);
+  const want = new Set(primaryKey);
+  if (want.size === 0 || keys.length !== want.size || !keys.every((k) => want.has(k))) {
+    throw new Error("Invalid primary key");
+  }
+}

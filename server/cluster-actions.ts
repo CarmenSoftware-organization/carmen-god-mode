@@ -2,9 +2,10 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { env } from "@/lib/env";
+import { describeTable } from "@/lib/introspect";
 import { requireAuth } from "@/lib/session";
 import { softDeleteRows, restoreRows } from "@/lib/soft-delete";
-import { valuesFromForm, parsePk } from "@/lib/form-values";
+import { valuesFromForm, parsePk, assertPkMatchesTable } from "@/lib/form-values";
 import { applyInsert, applyUpdate } from "@/lib/write";
 
 const TABLE = "tb_cluster";
@@ -46,6 +47,7 @@ export async function submitClusterUpdate(pkJson: string, formData: FormData): P
   await requireAuth();
   const schema = env().systemSchemaName;
   const pk = parsePk(pkJson);
+  assertPkMatchesTable(pk, (await describeTable(schema, TABLE)).primaryKey);
   // includeAllColumns=false: the cluster edit form hides deleted_at, so we must NOT
   // touch columns absent from the form (true would clobber deleted_at to "").
   const values = await valuesFromForm(schema, TABLE, formData, false);

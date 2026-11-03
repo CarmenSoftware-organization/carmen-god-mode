@@ -101,3 +101,25 @@ describe("checkConsoleStatement", () => {
     expect(() => checkConsoleStatement("SELECT dblink_exec('x','y')")).toThrow(/dblink_exec/);
   });
 });
+
+describe("checkConsoleStatement: non-transactional destructive functions", () => {
+  test.each([
+    "pg_drop_replication_slot('s')",
+    "pg_create_physical_replication_slot('s')",
+    "pg_create_logical_replication_slot('s','test_decoding')",
+    "pg_replication_slot_advance('s', '0/0')",
+    "pg_logical_slot_get_changes('s', NULL, NULL)",
+    "pg_logical_slot_get_binary_changes('s', NULL, NULL)",
+    "pg_switch_wal()",
+    "pg_create_restore_point('x')",
+    "pg_backup_start('x')",
+    "pg_backup_stop()",
+    "pg_notify('c','p')",
+    "pg_log_backend_memory_contexts(1)",
+    "pg_file_write('f','x',false)",
+    "pg_file_unlink('f')",
+    "pg_file_rename('a','b')",
+  ])("rejects SELECT %s", (fn) => {
+    expect(() => checkConsoleStatement(`SELECT ${fn}`)).toThrow(ConsoleSqlRejected);
+  });
+});

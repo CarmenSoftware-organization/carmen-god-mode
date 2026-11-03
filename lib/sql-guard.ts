@@ -51,7 +51,7 @@ const CONSOLE_WRITE_KEYWORDS = new Set([
   "INSERT", "UPDATE", "DELETE", "MERGE", "CREATE", "ALTER", "DROP", "TRUNCATE", "GRANT", "REVOKE", "COMMENT",
 ]);
 const CONSOLE_DENY_FN =
-  /\b(pg_terminate_backend|pg_cancel_backend|pg_reload_conf|pg_rotate_logfile|pg_promote|pg_read_file|pg_read_binary_file|pg_ls_dir|pg_stat_file|lo_import|lo_export|lo_unlink|dblink\w*|set_config|pg_advisory_\w*lock\w*|pg_sleep\w*)\s*\(/;
+  /\b(pg_terminate_backend|pg_cancel_backend|pg_reload_conf|pg_rotate_logfile|pg_promote|pg_read_file|pg_read_binary_file|pg_ls_dir|pg_stat_file|lo_import|lo_export|lo_unlink|dblink\w*|set_config|pg_advisory_\w*lock\w*|pg_sleep\w*|pg_drop_replication_slot|pg_create_physical_replication_slot|pg_create_logical_replication_slot|pg_replication_slot_advance|pg_logical_slot_get_changes|pg_logical_slot_get_binary_changes|pg_switch_wal|pg_create_restore_point|pg_backup_start|pg_backup_stop|pg_notify|pg_log_backend_memory_contexts|pg_file_write|pg_file_unlink|pg_file_rename)\s*\(/;
 
 /**
  * Vets a SQL-console statement before it runs: allowlisted leading keyword and

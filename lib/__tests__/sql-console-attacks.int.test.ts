@@ -39,32 +39,32 @@ beforeAll(async () => {
 });
 afterAll(async () => { await container.stop(); });
 
-async function expectRejectedUnchanged(fn: () => Promise<unknown>) {
+async function expectRejectedUnchanged(fn: () => Promise<unknown>, message: RegExp) {
   const a0 = await auditCount();
-  await expect(fn()).rejects.toThrow();
+  await expect(fn()).rejects.toThrow(message);
   expect(await itemCount()).toBe(3);
   expect(await auditCount()).toBe(a0);
 }
 
 test("runSql rejects multi-statement SELECT; DELETE", async () => {
   const { runSql } = await import("@/server/sql");
-  await expectRejectedUnchanged(() => runSql("app", "SELECT 1; DELETE FROM item"));
+  await expectRejectedUnchanged(() => runSql("app", "SELECT 1; DELETE FROM item"), /multiple commands/i);
 });
 
 test("runSql rejects SELECT 1; COMMIT; DELETE", async () => {
   const { runSql } = await import("@/server/sql");
-  await expectRejectedUnchanged(() => runSql("app", "SELECT 1; COMMIT; DELETE FROM item"));
+  await expectRejectedUnchanged(() => runSql("app", "SELECT 1; COMMIT; DELETE FROM item"), /multiple commands/i);
 });
 
 test("applySql rejects multi-statement on the write path", async () => {
   const { applySql } = await import("@/server/sql");
   await expectRejectedUnchanged(() =>
-    applySql("app", "DELETE FROM item WHERE id=1; DELETE FROM item"));
+    applySql("app", "DELETE FROM item WHERE id=1; DELETE FROM item"), /multiple commands/i);
 });
 
 test("runSql rejects SELECT INTO (read-only tx)", async () => {
   const { runSql } = await import("@/server/sql");
-  await expectRejectedUnchanged(() => runSql("app", "SELECT * INTO item_copy FROM item"));
+  await expectRejectedUnchanged(() => runSql("app", "SELECT * INTO item_copy FROM item"), /read-only transaction/i);
   expect(await regclass("app.item_copy")).toBeNull();
 });
 
@@ -72,7 +72,7 @@ test("runSql rejects setval and leaves sequence unchanged", async () => {
   const { runSql } = await import("@/server/sql");
   const before = await seqLast();
   await expectRejectedUnchanged(() =>
-    runSql("app", "SELECT setval(pg_get_serial_sequence('app.seq_t','id'), 999)"));
+    runSql("app", "SELECT setval(pg_get_serial_sequence('app.seq_t','id'), 999)"), /read-only transaction/i);
   expect(await seqLast()).toBe(before);
 });
 
@@ -80,7 +80,7 @@ test("runSql rejects pg_terminate_backend with ConsoleSqlRejected; connection st
   const { runSql } = await import("@/server/sql");
   const { ConsoleSqlRejected } = await import("@/lib/sql-guard");
   await expect(runSql("app", "SELECT pg_terminate_backend(pg_backend_pid())"))
-    .rejects.toBeInstanceOf(ConsoleSqlRejected);
+    .rejects.toSatisfy((e: unknown) => e instanceof ConsoleSqlRejected && /pg_terminate_backend/.test(e.message));
   const r = await runSql("app", "SELECT 1");
   expect(r.kind).toBe("read");
   expect(await itemCount()).toBe(3);
@@ -102,6 +102,7 @@ test("regression: semicolon inside a string literal", async () => {
 test("regression: DELETE preview then apply", async () => {
   const { runSql, applySql } = await import("@/server/sql");
   const a0 = await auditCount();
+  try {
   const p = await runSql("app", "DELETE FROM item WHERE id=1");
   expect(p.kind).toBe("write-preview");
   if (p.kind === "write-preview") expect(p.affected).toBe(1);
@@ -113,7 +114,10 @@ test("regression: DELETE preview then apply", async () => {
   if (a.kind === "write-applied") expect(a.affected).toBe(1);
   expect(await itemCount()).toBe(2);
   expect(await auditCount()).toBe(a0 + 1);
-  await q(`INSERT INTO app.item VALUES (1,'a')`);
+  expect(await itemCount()).toBe(2);
+  } finally {
+    await q(`INSERT INTO app.item VALUES (1,'a') ON CONFLICT DO NOTHING`);
+  }
   expect(await itemCount()).toBe(3);
 });
 
@@ -127,4 +131,5 @@ test("DDL: preview rolls back, apply persists and audits", async () => {
   expect(a.kind).toBe("write-applied");
   expect(await regclass("app.ddl_t")).not.toBeNull();
   expect(await auditCount()).toBe(a0 + 1);
+  await q(`DROP TABLE IF EXISTS app.ddl_t`);
 });

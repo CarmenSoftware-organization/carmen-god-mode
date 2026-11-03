@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parsePk } from "@/lib/form-values";
+import { parsePk, assertPkMatchesTable } from "@/lib/form-values";
 
 describe("parsePk", () => {
   test("accepts scalar-valued objects", () => {
@@ -14,4 +14,19 @@ describe("parsePk", () => {
       expect(() => parsePk(input)).toThrow("Invalid primary key");
     },
   );
+});
+
+describe("assertPkMatchesTable", () => {
+  test("accepts exact match regardless of order", () => {
+    expect(() => assertPkMatchesTable({ id: 1 }, ["id"])).not.toThrow();
+    expect(() => assertPkMatchesTable({ b: 1, a: 2 }, ["a", "b"])).not.toThrow();
+  });
+  test.each([
+    ["subset", { a: 1 }, ["a", "b"]],
+    ["superset", { a: 1, b: 2 }, ["a"]],
+    ["different key", { status: "active" }, ["id"]],
+    ["empty primaryKey", { id: 1 }, []],
+  ] as [string, Record<string, unknown>, string[]][])("rejects %s", (_n, pk, primaryKey) => {
+    expect(() => assertPkMatchesTable(pk, primaryKey)).toThrow("Invalid primary key");
+  });
 });
