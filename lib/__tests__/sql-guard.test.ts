@@ -1,5 +1,5 @@
-import { expect, test } from "vitest";
-import { ident, qualified, classifyStatement } from "@/lib/sql-guard";
+import { describe, expect, test } from "vitest";
+import { ident, qualified, classifyStatement, checkConsoleStatement, ConsoleSqlRejected } from "@/lib/sql-guard";
 
 test("ident quotes a normal name", () => {
   expect(ident("tb_user")).toBe('"tb_user"');
@@ -33,4 +33,93 @@ test("classifyStatement detects writes", () => {
   expect(classifyStatement("DROP TABLE t")).toBe("write");
   expect(classifyStatement("EXPLAIN ANALYZE DELETE FROM t")).toBe("write");
   expect(classifyStatement("WITH x AS (DELETE FROM t RETURNING *) SELECT * FROM x")).toBe("write");
+});
+
+describe("checkConsoleStatement", () => {
+  test.each([
+    "SELECT 1", "-- c\nSELECT 1", "/* c */ select 1", "WITH x AS (SELECT 1) SELECT * FROM x",
+    "TABLE t", "VALUES (1)", "EXPLAIN SELECT 1", "SHOW search_path", "(SELECT 1)",
+    "SELECT 1 AS pg_sleep_count",
+  ])("read: %s", (q) => {
+    expect(checkConsoleStatement(q)).toBe("read");
+  });
+
+  test.each([
+    "INSERT INTO t VALUES (1)", "update t set a=1", "DELETE FROM t",
+    "MERGE INTO t USING s ON true WHEN MATCHED THEN DELETE",
+    "WITH d AS (DELETE FROM t RETURNING *) SELECT * FROM d",
+    "CREATE INDEX i ON t(a)", "ALTER TABLE t ADD COLUMN b int", "DROP TABLE t", "TRUNCATE t",
+    "GRANT SELECT ON t TO x", "REVOKE SELECT ON t FROM x", "COMMENT ON TABLE t IS 'x'",
+    "EXPLAIN ANALYZE SELECT 1",
+  ])("write: %s", (q) => {
+    expect(checkConsoleStatement(q)).toBe("write");
+  });
+
+  test.each([
+    "", "   ", "BEGIN", "COMMIT", "ROLLBACK", "END", "ABORT", "SAVEPOINT s", "RELEASE s",
+    "START TRANSACTION", "PREPARE TRANSACTION 'x'", "COPY t TO PROGRAM 'x'", "COPY t FROM STDIN",
+    "SET search_path TO x", "RESET ALL", "DISCARD ALL", "DO $$BEGIN END$$", "CALL p()",
+    "LISTEN c", "NOTIFY c", "VACUUM", "LOCK TABLE t",
+  ])("rejects disallowed statement: %j", (q) => {
+    expect(() => checkConsoleStatement(q)).toThrow(ConsoleSqlRejected);
+  });
+
+  test.each([
+    "SELECT pg_terminate_backend(1)", "select PG_CANCEL_BACKEND(1)",
+    "SELECT pg_catalog.pg_terminate_backend(1)", 'SELECT "pg_terminate_backend"(1)',
+    'SELECT pg_catalog."pg_sleep" (1)', "SELECT pg_sleep_for('1s')", "SELECT pg_advisory_xact_lock(1)",
+    "SELECT set_config('a','b',false)", "SELECT dblink_exec('x','y')", "SELECT lo_unlink(1)",
+    "SELECT pg_read_file('/etc/passwd')", "UPDATE t SET a = pg_reload_conf()",
+  ])("rejects denylisted function: %s", (q) => {
+    expect(() => checkConsoleStatement(q)).toThrow(ConsoleSqlRejected);
+  });
+
+  test.each([
+    "SELECT pg_sleep/**/(1)", "SELECT '--', pg_sleep(1)", "SELECT '/*', pg_sleep(1), '*/'", "SELECT pg_terminate_backend -- x\n(1)", 'SELECT pg_catalog."pg_sleep"/**/(1)',
+  ])("rejects comment-obfuscated call: %j", (q) => {
+    expect(() => checkConsoleStatement(q)).toThrow(ConsoleSqlRejected);
+  });
+
+  test("parenthesised statements are classified by their contents", () => {
+    expect(checkConsoleStatement("(WITH d AS (DELETE FROM t RETURNING *) SELECT * FROM d)")).toBe("write");
+    expect(checkConsoleStatement("((SELECT 1))")).toBe("read");
+  });
+
+  test.each(["EXPLAIN (ANALYZE) DELETE FROM t", "EXPLAIN (ANALYZE, BUFFERS) UPDATE t SET a=1", "EXPLAIN ANALYSE SELECT 1", "EXPLAIN (ANALYSE) DELETE FROM t", "EXPLAIN (ANALYZE false, ANALYZE true) SELECT 1", "EXPLAIN (ANALYZE false) SELECT 1"])("write: %s", (q) => {
+    expect(checkConsoleStatement(q)).toBe("write");
+    expect(classifyStatement(q)).toBe("write");
+  });
+
+  test.each(["EXPLAIN (COSTS false) SELECT 1"])("read: %s", (q) => {
+    expect(checkConsoleStatement(q)).toBe("read");
+  });
+
+  test("error messages name the rejected keyword / function", () => {
+    expect(() => checkConsoleStatement("BEGIN")).toThrow(/BEGIN/);
+    expect(() => checkConsoleStatement("SELECT pg_sleep(1)")).toThrow(/pg_sleep/);
+    expect(() => checkConsoleStatement("select PG_CANCEL_BACKEND(1)")).toThrow(/pg_cancel_backend/);
+    expect(() => checkConsoleStatement("SELECT dblink_exec('x','y')")).toThrow(/dblink_exec/);
+  });
+});
+
+describe("checkConsoleStatement: non-transactional destructive functions", () => {
+  test.each([
+    "pg_drop_replication_slot('s')",
+    "pg_create_physical_replication_slot('s')",
+    "pg_create_logical_replication_slot('s','test_decoding')",
+    "pg_replication_slot_advance('s', '0/0')",
+    "pg_logical_slot_get_changes('s', NULL, NULL)",
+    "pg_logical_slot_get_binary_changes('s', NULL, NULL)",
+    "pg_switch_wal()",
+    "pg_create_restore_point('x')",
+    "pg_backup_start('x')",
+    "pg_backup_stop()",
+    "pg_notify('c','p')",
+    "pg_log_backend_memory_contexts(1)",
+    "pg_file_write('f','x',false)",
+    "pg_file_unlink('f')",
+    "pg_file_rename('a','b')",
+  ])("rejects SELECT %s", (fn) => {
+    expect(() => checkConsoleStatement(`SELECT ${fn}`)).toThrow(ConsoleSqlRejected);
+  });
 });

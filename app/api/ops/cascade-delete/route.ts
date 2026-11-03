@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { env } from "@/lib/env";
 import { requireAuth } from "@/lib/session";
+import { readJsonObject, isOptionalString, isOptionalBoolean, isPlainObject } from "@/lib/request-body";
 import { executeCascade, executeCascadeMany } from "@/lib/cascade";
 import { requiredPhrase, phraseMatches } from "@/lib/delete-confirm";
 import { resolveTenantSchema, resolveTenantSchemasForCluster } from "@/lib/registry";
@@ -22,9 +23,17 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { schema, table, pks, dropSchema, confirm } = (await request.json()) as Body;
+  const body = await readJsonObject(request);
+  if (!body) return Response.json({ error: "Request body must be a JSON object" }, { status: 400 });
+  const { schema, table, pks, dropSchema, confirm } = body as Body;
   if (!Array.isArray(pks) || pks.length === 0) {
     return Response.json({ error: "No rows selected" }, { status: 400 });
+  }
+  if (
+    typeof schema !== "string" || typeof table !== "string" || !pks.every(isPlainObject) ||
+    !isOptionalString(confirm) || !isOptionalBoolean(dropSchema)
+  ) {
+    return Response.json({ error: "Invalid field types in request body" }, { status: 400 });
   }
 
   const isBusinessUnit = schema === env().systemSchemaName && table === "tb_business_unit";

@@ -20,13 +20,60 @@ function stripLeading(sqlText: string): string {
   return s;
 }
 
+function stripComments(text: string): string {
+  return text.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
+}
+
 export function classifyStatement(sqlText: string): "read" | "write" {
   const s = stripLeading(sqlText).toUpperCase();
-  if (/^EXPLAIN\s+ANALYZE/.test(s)) return "write";
-  if (/^(SELECT|EXPLAIN|SHOW|TABLE|VALUES)\b/.test(s)) return "read";
+  if (/^EXPLAIN\b/.test(s)) {
+    // Fail closed: EXPLAIN ANALYZE/ANALYSE executes the statement; any mention (incl. duplicate options) is a write.
+    const body = stripComments(s).replace(/"/g, "");
+    return /\bANALY[SZ]E\b/.test(body) ? "write" : "read";
+  }
+  if (/^(SELECT|SHOW|TABLE|VALUES)\b/.test(s)) return "read";
   if (/^WITH\b/.test(s)) {
     // A CTE chain is a write iff it contains a data-modifying statement.
     return /\b(INSERT|UPDATE|DELETE|MERGE)\b/.test(s) ? "write" : "read";
   }
   return "write";
+}
+
+export class ConsoleSqlRejected extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ConsoleSqlRejected";
+  }
+}
+
+const CONSOLE_READ_KEYWORDS = new Set(["SELECT", "WITH", "TABLE", "VALUES", "EXPLAIN", "SHOW", "("]);
+const CONSOLE_WRITE_KEYWORDS = new Set([
+  "INSERT", "UPDATE", "DELETE", "MERGE", "CREATE", "ALTER", "DROP", "TRUNCATE", "GRANT", "REVOKE", "COMMENT",
+]);
+const CONSOLE_DENY_FN =
+  /\b(pg_terminate_backend|pg_cancel_backend|pg_reload_conf|pg_rotate_logfile|pg_promote|pg_read_file|pg_read_binary_file|pg_ls_dir|pg_stat_file|lo_import|lo_export|lo_unlink|dblink\w*|set_config|pg_advisory_\w*lock\w*|pg_sleep\w*|pg_drop_replication_slot|pg_create_physical_replication_slot|pg_create_logical_replication_slot|pg_replication_slot_advance|pg_logical_slot_get_changes|pg_logical_slot_get_binary_changes|pg_switch_wal|pg_create_restore_point|pg_backup_start|pg_backup_stop|pg_notify|pg_log_backend_memory_contexts|pg_file_write|pg_file_unlink|pg_file_rename)\s*\(/;
+
+/**
+ * Vets a SQL-console statement before it runs: allowlisted leading keyword and
+ * no side-effect function calls. A mistake guard, not a sandbox — a determined
+ * admin can still bypass it. See
+ * docs/superpowers/specs/2026-11-03-security-test-suite-design.md.
+ */
+export function checkConsoleStatement(sqlText: string): "read" | "write" {
+  const s = stripLeading(sqlText).toUpperCase();
+  if (s.length === 0) throw new ConsoleSqlRejected("Empty statement");
+  const keyword = s.startsWith("(") ? "(" : (/^[A-Z]+/.exec(s)?.[0] ?? "");
+  if (!CONSOLE_READ_KEYWORDS.has(keyword) && !CONSOLE_WRITE_KEYWORDS.has(keyword)) {
+    throw new ConsoleSqlRejected(`Statement type not allowed in console: ${keyword || s.slice(0, 20)}`);
+  }
+  // Best-effort: comments between a function name and "(" must not hide the call.
+  // Also test the raw text: a comment marker inside a string literal must not hide a call.
+  const norm = (t: string) => t.toLowerCase().replace(/"/g, "");
+  const fn = CONSOLE_DENY_FN.exec(norm(sqlText)) ?? CONSOLE_DENY_FN.exec(norm(stripComments(sqlText)));
+  if (fn) throw new ConsoleSqlRejected(`Function not allowed in console: ${fn[1]}`);
+  // classifyStatement treats a leading "(" as write; classify the unwrapped inner statement instead.
+  if (keyword === "(") {
+    return classifyStatement(stripLeading(sqlText).replace(/^[(\s]+/, ""));
+  }
+  return classifyStatement(sqlText);
 }

@@ -11,11 +11,16 @@ export function getSql(): Sql {
 export async function withTransaction<T>(
   schema: string | null,
   fn: (tx: TransactionSql) => Promise<T>,
+  opts?: { readOnly?: boolean },
 ): Promise<T> {
-  return getSql().begin(async (tx) => {
+  const run = async (tx: TransactionSql) => {
     if (schema) await tx.unsafe(`SET LOCAL search_path TO ${ident(schema)}`);
-    return fn(tx as TransactionSql);
-  }) as Promise<T>;
+    return fn(tx);
+  };
+  if (opts?.readOnly) {
+    return getSql().begin("read only", (tx) => run(tx as TransactionSql)) as Promise<T>;
+  }
+  return getSql().begin((tx) => run(tx as TransactionSql)) as Promise<T>;
 }
 
 export { ident, qualified };
