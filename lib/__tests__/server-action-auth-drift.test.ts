@@ -95,7 +95,7 @@ export function findViolations(file: string, raw: string): string[] {
   // Only `export async function`, `export type` and `export interface` may appear:
   // anything else (const/let/var, default, `export {}`, `export *`, wrappers) hides
   // an action from the per-function guard below.
-  const bad = /\bexport\s+(?!async\s+function\b|type\b|interface\b)(\S+)/g;
+  const bad = /\bexport(?![\w$])\s*(?!async\s+function\b|type\b|interface\b)(\S+)/g;
   let b: RegExpExecArray | null;
   while ((b = bad.exec(src))) {
     problems.push(`${file}: 'export ${b[1]}' is not allowed in a "use server" file; use 'export async function'`);
@@ -227,6 +227,10 @@ describe("server actions must authenticate first", () => {
       expect(findViolations("f.ts", `"use server";\nexport * from "./x";\n`)).not.toEqual([]);
       expect(findViolations("f.ts", `"use server";\nexport const f = wrap(async () => {});\n`)).not.toEqual([]);
       expect(findViolations("f.ts", `"use server";\nexport const f = function () {};\n`)).not.toEqual([]);
+    });
+    test("whitespace-free export{} and export*from are violations", () => {
+      expect(findViolations("f.ts", `"use server";\nasync function a() {}\nexport{ a };\n`)).not.toEqual([]);
+      expect(findViolations("f.ts", `"use server";\nexport*from "./x";\n`)).not.toEqual([]);
     });
     test("type and interface exports are allowed", () => {
       expect(findViolations("f.ts", `"use server";\nexport type A = number;\nexport interface B {}\n`)).toEqual([]);
