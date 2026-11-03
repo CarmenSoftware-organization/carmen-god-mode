@@ -20,14 +20,16 @@ function stripLeading(sqlText: string): string {
   return s;
 }
 
+function stripComments(text: string): string {
+  return text.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
+}
+
 export function classifyStatement(sqlText: string): "read" | "write" {
   const s = stripLeading(sqlText).toUpperCase();
   if (/^EXPLAIN\b/.test(s)) {
-    // EXPLAIN ANALYZE executes the statement. Options: `ANALYZE [bool]` bare or in a leading (...) list.
-    const opts = /^EXPLAIN\s*\(([^)]*)\)/.exec(s)?.[1];
-    const m = opts !== undefined ? /(?:^|,)\s*ANALYZE\b\s*([A-Z0-9]*)/.exec(opts) : /^EXPLAIN\s+ANALYZE\b\s*([A-Z0-9]*)/.exec(s);
-    if (m && !["FALSE", "OFF", "0"].includes(m[1])) return "write";
-    return "read";
+    // Fail closed: EXPLAIN ANALYZE/ANALYSE executes the statement; any mention (incl. duplicate options) is a write.
+    const body = stripComments(s).replace(/"/g, "");
+    return /\bANALY[SZ]E\b/.test(body) ? "write" : "read";
   }
   if (/^(SELECT|SHOW|TABLE|VALUES)\b/.test(s)) return "read";
   if (/^WITH\b/.test(s)) {
@@ -65,8 +67,9 @@ export function checkConsoleStatement(sqlText: string): "read" | "write" {
     throw new ConsoleSqlRejected(`Statement type not allowed in console: ${keyword || s.slice(0, 20)}`);
   }
   // Best-effort: comments between a function name and "(" must not hide the call.
-  const decommented = sqlText.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
-  const fn = CONSOLE_DENY_FN.exec(decommented.toLowerCase().replace(/"/g, ""));
+  // Also test the raw text: a comment marker inside a string literal must not hide a call.
+  const norm = (t: string) => t.toLowerCase().replace(/"/g, "");
+  const fn = CONSOLE_DENY_FN.exec(norm(sqlText)) ?? CONSOLE_DENY_FN.exec(norm(stripComments(sqlText)));
   if (fn) throw new ConsoleSqlRejected(`Function not allowed in console: ${fn[1]}`);
   // classifyStatement treats a leading "(" as write; classify the unwrapped inner statement instead.
   if (keyword === "(") {

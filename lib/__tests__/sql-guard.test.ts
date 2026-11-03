@@ -75,7 +75,7 @@ describe("checkConsoleStatement", () => {
   });
 
   test.each([
-    "SELECT pg_sleep/**/(1)", "SELECT pg_terminate_backend -- x\n(1)", 'SELECT pg_catalog."pg_sleep"/**/(1)',
+    "SELECT pg_sleep/**/(1)", "SELECT '--', pg_sleep(1)", "SELECT '/*', pg_sleep(1), '*/'", "SELECT pg_terminate_backend -- x\n(1)", 'SELECT pg_catalog."pg_sleep"/**/(1)',
   ])("rejects comment-obfuscated call: %j", (q) => {
     expect(() => checkConsoleStatement(q)).toThrow(ConsoleSqlRejected);
   });
@@ -85,12 +85,12 @@ describe("checkConsoleStatement", () => {
     expect(checkConsoleStatement("((SELECT 1))")).toBe("read");
   });
 
-  test.each(["EXPLAIN (ANALYZE) DELETE FROM t", "EXPLAIN (ANALYZE, BUFFERS) UPDATE t SET a=1"])("write: %s", (q) => {
+  test.each(["EXPLAIN (ANALYZE) DELETE FROM t", "EXPLAIN (ANALYZE, BUFFERS) UPDATE t SET a=1", "EXPLAIN ANALYSE SELECT 1", "EXPLAIN (ANALYSE) DELETE FROM t", "EXPLAIN (ANALYZE false, ANALYZE true) SELECT 1", "EXPLAIN (ANALYZE false) SELECT 1"])("write: %s", (q) => {
     expect(checkConsoleStatement(q)).toBe("write");
     expect(classifyStatement(q)).toBe("write");
   });
 
-  test.each(["EXPLAIN (COSTS false) SELECT 1", "EXPLAIN (ANALYZE false) SELECT 1", "EXPLAIN (ANALYZE off) SELECT 1"])("read: %s", (q) => {
+  test.each(["EXPLAIN (COSTS false) SELECT 1"])("read: %s", (q) => {
     expect(checkConsoleStatement(q)).toBe("read");
   });
 
