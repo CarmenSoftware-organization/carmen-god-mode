@@ -73,4 +73,31 @@ describe("checkConsoleStatement", () => {
   ])("rejects denylisted function: %s", (q) => {
     expect(() => checkConsoleStatement(q)).toThrow(ConsoleSqlRejected);
   });
+
+  test.each([
+    "SELECT pg_sleep/**/(1)", "SELECT pg_terminate_backend -- x\n(1)", 'SELECT pg_catalog."pg_sleep"/**/(1)',
+  ])("rejects comment-obfuscated call: %j", (q) => {
+    expect(() => checkConsoleStatement(q)).toThrow(ConsoleSqlRejected);
+  });
+
+  test("parenthesised statements are classified by their contents", () => {
+    expect(checkConsoleStatement("(WITH d AS (DELETE FROM t RETURNING *) SELECT * FROM d)")).toBe("write");
+    expect(checkConsoleStatement("((SELECT 1))")).toBe("read");
+  });
+
+  test.each(["EXPLAIN (ANALYZE) DELETE FROM t", "EXPLAIN (ANALYZE, BUFFERS) UPDATE t SET a=1"])("write: %s", (q) => {
+    expect(checkConsoleStatement(q)).toBe("write");
+    expect(classifyStatement(q)).toBe("write");
+  });
+
+  test.each(["EXPLAIN (COSTS false) SELECT 1", "EXPLAIN (ANALYZE false) SELECT 1", "EXPLAIN (ANALYZE off) SELECT 1"])("read: %s", (q) => {
+    expect(checkConsoleStatement(q)).toBe("read");
+  });
+
+  test("error messages name the rejected keyword / function", () => {
+    expect(() => checkConsoleStatement("BEGIN")).toThrow(/BEGIN/);
+    expect(() => checkConsoleStatement("SELECT pg_sleep(1)")).toThrow(/pg_sleep/);
+    expect(() => checkConsoleStatement("select PG_CANCEL_BACKEND(1)")).toThrow(/pg_cancel_backend/);
+    expect(() => checkConsoleStatement("SELECT dblink_exec('x','y')")).toThrow(/dblink_exec/);
+  });
 });

@@ -22,8 +22,14 @@ function stripLeading(sqlText: string): string {
 
 export function classifyStatement(sqlText: string): "read" | "write" {
   const s = stripLeading(sqlText).toUpperCase();
-  if (/^EXPLAIN\s+ANALYZE/.test(s)) return "write";
-  if (/^(SELECT|EXPLAIN|SHOW|TABLE|VALUES)\b/.test(s)) return "read";
+  if (/^EXPLAIN\b/.test(s)) {
+    // EXPLAIN ANALYZE executes the statement. Options: `ANALYZE [bool]` bare or in a leading (...) list.
+    const opts = /^EXPLAIN\s*\(([^)]*)\)/.exec(s)?.[1];
+    const m = opts !== undefined ? /(?:^|,)\s*ANALYZE\b\s*([A-Z0-9]*)/.exec(opts) : /^EXPLAIN\s+ANALYZE\b\s*([A-Z0-9]*)/.exec(s);
+    if (m && !["FALSE", "OFF", "0"].includes(m[1])) return "write";
+    return "read";
+  }
+  if (/^(SELECT|SHOW|TABLE|VALUES)\b/.test(s)) return "read";
   if (/^WITH\b/.test(s)) {
     // A CTE chain is a write iff it contains a data-modifying statement.
     return /\b(INSERT|UPDATE|DELETE|MERGE)\b/.test(s) ? "write" : "read";
@@ -58,9 +64,13 @@ export function checkConsoleStatement(sqlText: string): "read" | "write" {
   if (!CONSOLE_READ_KEYWORDS.has(keyword) && !CONSOLE_WRITE_KEYWORDS.has(keyword)) {
     throw new ConsoleSqlRejected(`Statement type not allowed in console: ${keyword || s.slice(0, 20)}`);
   }
-  const fn = CONSOLE_DENY_FN.exec(sqlText.toLowerCase().replace(/"/g, ""));
+  // Best-effort: comments between a function name and "(" must not hide the call.
+  const decommented = sqlText.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/--[^\n]*/g, " ");
+  const fn = CONSOLE_DENY_FN.exec(decommented.toLowerCase().replace(/"/g, ""));
   if (fn) throw new ConsoleSqlRejected(`Function not allowed in console: ${fn[1]}`);
-  // classifyStatement treats a leading "(" as write; a parenthesised top-level statement is a query.
-  if (keyword === "(") return "read";
+  // classifyStatement treats a leading "(" as write; classify the unwrapped inner statement instead.
+  if (keyword === "(") {
+    return classifyStatement(stripLeading(sqlText).replace(/^[(\s]+/, ""));
+  }
   return classifyStatement(sqlText);
 }
