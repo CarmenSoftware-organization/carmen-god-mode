@@ -98,3 +98,27 @@ test("platform-migrate: numeric opId -> 4xx", async () => {
   expect(res.status).toBeLessThan(500);
   expect(executorsCalled()).toBe(false);
 });
+
+describe("wrong-typed fields -> 400, nothing executed", () => {
+  const cases: [string, unknown][] = [
+    ["platform-migrate", { opId: "prisma-status", schema: 123 }],
+    ["platform-migrate", { opId: "prisma-status", schema: "public", bu: 1 }],
+    ["platform-migrate", { opId: "prisma-status", schema: "public", only: 1 }],
+    ["platform-migrate", { opId: "prisma-status", schema: "public", confirm: 1 }],
+    ["platform-migrate", { opId: "prisma-status", schema: "public", confirmDestroy: "yes" }],
+    ["platform-migrate", { opId: "prisma-status", schema: "public", confirmCreateSchema: "yes" }],
+    ["cascade-delete", { schema: 1, table: 2, pks: [{}], confirm: "DELETE" }],
+    ["cascade-delete", { schema: "s", table: "t", pks: [null], confirm: "DELETE" }],
+    ["cascade-delete", { schema: "s", table: "t", pks: [[]], confirm: "DELETE" }],
+    ["cascade-delete", { schema: "s", table: "t", pks: [{}], confirm: 5 }],
+    ["cascade-delete", { schema: "s", table: "t", pks: [{}], dropSchema: "yes", confirm: "DELETE" }],
+    ["cascade-delete", { schema: "CARMEN_SYSTEM", table: "tb_business_unit", pks: [null], dropSchema: true, confirm: "DELETE" }],
+    ["drop-schema", { schema: "tenant_x", confirm: 5 }],
+  ];
+  test.each(cases)("%s %j", async (name, body) => {
+    const POST = await routes[name]();
+    const res = await POST(mk(name, JSON.stringify(body)));
+    expect(res.status).toBe(400);
+    expect(executorsCalled()).toBe(false);
+  });
+});

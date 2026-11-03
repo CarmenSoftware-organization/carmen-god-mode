@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { env } from "@/lib/env";
 import { requireAuth } from "@/lib/session";
-import { readJsonObject } from "@/lib/request-body";
+import { readJsonObject, isOptionalString, isOptionalBoolean, isPlainObject } from "@/lib/request-body";
 import { executeCascade, executeCascadeMany } from "@/lib/cascade";
 import { requiredPhrase, phraseMatches } from "@/lib/delete-confirm";
 import { resolveTenantSchema, resolveTenantSchemasForCluster } from "@/lib/registry";
@@ -28,6 +28,12 @@ export async function POST(request: Request): Promise<Response> {
   const { schema, table, pks, dropSchema, confirm } = body as Body;
   if (!Array.isArray(pks) || pks.length === 0) {
     return Response.json({ error: "No rows selected" }, { status: 400 });
+  }
+  if (
+    typeof schema !== "string" || typeof table !== "string" || !pks.every(isPlainObject) ||
+    !isOptionalString(confirm) || !isOptionalBoolean(dropSchema)
+  ) {
+    return Response.json({ error: "Invalid field types in request body" }, { status: 400 });
   }
 
   const isBusinessUnit = schema === env().systemSchemaName && table === "tb_business_unit";

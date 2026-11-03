@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/session";
-import { readJsonObject } from "@/lib/request-body";
+import { readJsonObject, isOptionalString, isOptionalBoolean } from "@/lib/request-body";
 import { env } from "@/lib/env";
 import { streamOperation } from "@/lib/progress";
 import { withTransaction } from "@/lib/db";
@@ -79,6 +79,12 @@ export async function POST(request: Request): Promise<Response> {
   if (!body) return bad("Request body must be a JSON object", 400);
   const { opId, schema, bu, only, confirm, confirmDestroy, confirmCreateSchema } = body as Body;
   if (typeof opId !== "string") return bad("opId must be a string", 400);
+  if (
+    !isOptionalString(schema) || !isOptionalString(bu) || !isOptionalString(only) ||
+    !isOptionalString(confirm) || !isOptionalBoolean(confirmDestroy) || !isOptionalBoolean(confirmCreateSchema)
+  ) {
+    return bad("Invalid field types in request body", 400);
+  }
   const op = findOp(opId);
   if (!op) return bad(`Unknown operation: ${opId}`, 404);
   if (op.group === "danger" && !env().allowDangerOps) {
