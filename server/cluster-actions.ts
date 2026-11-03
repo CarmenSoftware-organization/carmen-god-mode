@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { env } from "@/lib/env";
 import { requireAuth } from "@/lib/session";
 import { softDeleteRows, restoreRows } from "@/lib/soft-delete";
-import { valuesFromForm } from "@/server/rows";
+import { valuesFromForm, parsePk } from "@/lib/form-values";
 import { applyInsert, applyUpdate } from "@/lib/write";
 
 const TABLE = "tb_cluster";
@@ -45,7 +45,7 @@ export async function submitClusterInsert(formData: FormData): Promise<void> {
 export async function submitClusterUpdate(pkJson: string, formData: FormData): Promise<void> {
   await requireAuth();
   const schema = env().systemSchemaName;
-  const pk = JSON.parse(pkJson) as Record<string, unknown>;
+  const pk = parsePk(pkJson);
   // includeAllColumns=false: the cluster edit form hides deleted_at, so we must NOT
   // touch columns absent from the form (true would clobber deleted_at to "").
   const values = await valuesFromForm(schema, TABLE, formData, false);
