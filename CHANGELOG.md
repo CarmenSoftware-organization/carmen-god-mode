@@ -9,7 +9,54 @@
 
 ## [Unreleased]
 
-<!-- build:bump เขียนร่างจาก commit ไว้ตรงนี้ แก้ให้เป็นภาษาคนก่อนตัดรุ่น -->
+## [0.4.2] — 2026-11-05
+
+A security pass over the SQL console and the write endpoints, a batch-delete fix, and the
+`PLATFORM` → `BACKSTAGE` rename.
+
+### Changed
+
+**`PLATFORM_PACKAGE_DIR` is now `BACKSTAGE_PACKAGE_DIR`, with no fallback** (581812d, eef95bf, b5fbb57)
+Rename the variable in every env file before upgrading. Without it the `/platform-migrations` page
+cannot find the package. The default package path is now `prisma-shared-schema-backstage`, catalog
+commands are `db:seed.backstage-*` / `db:check.backstage-*` (registry ids are unchanged), and the
+gateway permission check calls `GET /api/user/permission/backstage` instead of `/platform`.
+
+### Fixed
+
+**Batch delete of ~100+ rows failed with 431** (#41)
+The Delete / Hard delete button put every selected primary key in the URL. Next.js repeats the URL in
+its navigation headers, so around 100 UUIDs the request went over Node's 16KB header limit. The
+selection now goes into the tab's sessionStorage and the confirm page fetches the blast radius through
+a server action. This applies to clusters, business units and the generic row grid.
+
+**The SQL console can no longer be used to write or to take the database down** (#38)
+Each run executes exactly one statement, and the read path runs inside a `READ ONLY` transaction.
+Statements are checked against an allowlist and a side-effect denylist that matches both the raw and
+the comment-stripped text, so comments and parentheses no longer hide a write. The denylist includes
+functions such as `pg_terminate_backend` and `pg_drop_replication_slot`. `EXPLAIN ANALYZE` (and
+`ANALYSE`) is refused, because it executes the statement it explains.
+
+**Write endpoints validate their input** (#38)
+`valuesFromForm` is no longer exported as a public server action. A row's `pkJson` must name exactly
+the table's primary-key columns, so a tampered key cannot match many rows. `app/api/ops/*` answers
+malformed bodies and wrong field types with 400 instead of 500.
+
+**Deploy health check** (#35)
+It now probes Next.js directly at `127.0.0.1:$PORT`, not nginx on `:9903`, which answered 301.
+
+**Migrations catalog drift** (#37)
+Added the `seed/check application-api` ops, recorded why 4 scripts stay hidden, and removed the stale
+`db:backfill.subscription`. `seed-report-template-upload` and `db:backfill.bu-license` are gone
+because backend #927 deleted those scripts.
+
+### Internal
+
+- A security test suite pins the middleware gate, session-cookie hardening, and a drift guard that
+  requires every server action to call `requireAuth` first.
+- `.trail/` holds trail's index config and the learnings shared between sessions. Its generated
+  files are excluded from lint, so `bun run lint` is clean again (#42).
+- Tests: 450 (one, `platform-catalog-drift`, depends on the local backstage package checkout).
 
 ## [0.4.1] — 2026-08-30
 
