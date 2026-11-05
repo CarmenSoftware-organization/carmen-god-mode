@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     ".remember/**",
     // Agent-harness config & hooks — CommonJS by necessity, not app code.
     ".claude/**",
+    // trail CLI generated files (CommonJS), not app code.
+    ".trail/**",
   ]),
 ]);
 
