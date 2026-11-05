@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { batchDeleteHref, stageBatchSelection } from "@/lib/batch-selection";
 import type { RowPage } from "@/lib/rows";
 import { Table, THead, TBody, TR, Th, Td } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,7 +34,7 @@ export function RowGrid({ schema, table, page }: { schema: string; table: string
   }
 
   const selectedPks = [...selected].map((k) => JSON.parse(k) as Record<string, unknown>);
-  const batchHref = `/${encodeURIComponent(schema)}/${encodeURIComponent(table)}/delete-batch?pks=${encodeURIComponent(JSON.stringify(selectedPks))}`;
+  const batchHref = batchDeleteHref(schema, table);
   const allSelected = page.rows.length > 0 && selected.size === page.rows.length;
 
   return (
@@ -51,7 +52,7 @@ export function RowGrid({ schema, table, page }: { schema: string; table: string
           <span className="text-sm font-medium text-danger-subtle-foreground">
             {selected.size} selected
           </span>
-          <Link href={batchHref}>
+          <Link href={batchHref} onClick={() => stageBatchSelection(schema, table, selectedPks)}>
             <Button variant="danger" size="sm">
               <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
               Delete {selected.size}

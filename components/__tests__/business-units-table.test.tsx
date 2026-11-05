@@ -35,7 +35,7 @@ test("checking a row reveals Delete N selected with the delete-batch href", asyn
   const link = screen.getByText("Delete 1").closest("a")!;
   expect(link).toHaveAttribute(
     "href",
-    `/CARMEN_SYSTEM/tb_business_unit/delete-batch?pks=${encodeURIComponent(JSON.stringify([{ id: "11" }]))}`,
+    "/CARMEN_SYSTEM/tb_business_unit/delete-batch",
   );
 });
 
