@@ -9,6 +9,7 @@ import {
   Plus,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { batchDeleteHref, stageBatchSelection } from "@/lib/batch-selection";
 import type { Cluster } from "@/lib/registry";
 import { Tabs } from "@/components/ui/tabs";
 import { Table, THead, TBody, TR, Th, Td } from "@/components/ui/table";
@@ -59,7 +60,7 @@ export function ClustersTable({
 
   const selectedPks = [...selected].map((k) => JSON.parse(k) as { id: string });
   const allSelected = rows.length > 0 && selected.size === rows.length;
-  const batchDeleteHref = `/${encodeURIComponent(system)}/tb_cluster/delete-batch?pks=${encodeURIComponent(JSON.stringify(selectedPks))}`;
+  const batchDeleteHrefValue = batchDeleteHref(system, "tb_cluster");
 
   const tabs = [
     { id: "active" as const, label: "Active", count: active.length },
@@ -101,7 +102,7 @@ export function ClustersTable({
               Restore {selected.size}
             </Button>
           </form>
-          <Link href={batchDeleteHref}>
+          <Link href={batchDeleteHrefValue} onClick={() => stageBatchSelection(system, "tb_cluster", selectedPks)}>
             <Button variant="danger" size="sm">
               <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
               Hard delete {selected.size}

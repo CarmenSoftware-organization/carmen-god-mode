@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Trash2, ArrowRight, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { batchDeleteHref, stageBatchSelection } from "@/lib/batch-selection";
 import type { BusinessUnit } from "@/lib/registry";
 import { Table, THead, TBody, TR, Th, Td } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -43,7 +44,7 @@ export function BusinessUnitsTable({
   }
 
   const selectedPks = [...selected].map((k) => JSON.parse(k) as { id: string });
-  const batchHref = `/${encodeURIComponent(system)}/tb_business_unit/delete-batch?pks=${encodeURIComponent(JSON.stringify(selectedPks))}`;
+  const batchHref = batchDeleteHref(system, "tb_business_unit");
   const allSelected = bus.length > 0 && selected.size === bus.length;
 
   return (
@@ -54,7 +55,7 @@ export function BusinessUnitsTable({
           <span className="text-sm font-medium text-danger-subtle-foreground">
             {selected.size} selected
           </span>
-          <Link href={batchHref}>
+          <Link href={batchHref} onClick={() => stageBatchSelection(system, "tb_business_unit", selectedPks)}>
             <Button variant="danger" size="sm">
               <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
               Delete {selected.size}

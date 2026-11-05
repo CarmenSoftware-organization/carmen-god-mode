@@ -61,6 +61,6 @@ test("batch hard delete on the deleted tab targets delete-batch", async () => {
   fireEvent.click(screen.getByLabelText("Select row 1"));
   expect(screen.getByText("Hard delete 1").closest("a")).toHaveAttribute(
     "href",
-    `/CARMEN_SYSTEM/tb_cluster/delete-batch?pks=${encodeURIComponent(JSON.stringify([{ id: "22" }]))}`,
+    "/CARMEN_SYSTEM/tb_cluster/delete-batch",
   );
 });
