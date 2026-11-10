@@ -57,3 +57,7 @@ next-env.d.ts
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 graft/
+
+# trail hooks ของ Cursor มี absolute path ของเครื่อง local
+.cursor/hooks/
+.cursor/hooks.json
