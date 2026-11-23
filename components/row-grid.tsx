@@ -132,7 +132,7 @@ export function RowGrid({ schema, table, page }: { schema: string; table: string
                       {" "}
                       <Link
                         href={`/${encodeURIComponent(schema)}/${encodeURIComponent(table)}/delete?pk=${encodeURIComponent(JSON.stringify(pk(row, page.primaryKey)))}`}
-                        className="inline-flex items-center gap-1 text-sm font-medium text-danger hover:text-danger-hover"
+                        className="inline-flex items-center gap-1 text-sm font-medium text-danger-subtle-foreground hover:underline"
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         <span className="sr-only sm:not-sr-only">delete</span>

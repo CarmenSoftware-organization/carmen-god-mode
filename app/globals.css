@@ -32,8 +32,8 @@
   --secondary: oklch(0.9670 0.0029 264.5419);
   --secondary-foreground: oklch(0.4461 0.0263 256.8018);
   --muted: oklch(0.9846 0.0017 247.8389);
-  --muted-foreground: oklch(0.5510 0.0234 264.3637);
-  --destructive: oklch(0.6368 0.2078 25.3313);
+  --muted-foreground: oklch(0.4900 0.0234 264.3637); /* darkened from 0.551: ≥4.5:1 on background, sidebar and zebra rows */
+  --destructive: oklch(0.5700 0.2078 25.3313); /* darkened from 0.6368: white text ≥4.5:1 (AA) */
   --destructive-foreground: oklch(1.0000 0 0);
   --border: oklch(0.9022 0.0052 247.8822);
   --input: oklch(0.9700 0.0029 264.5420);
@@ -80,8 +80,10 @@
   --accent-hover: color-mix(in oklab, var(--primary), black 12%);
   --accent-foreground: var(--primary-foreground);
 
-  --link: var(--primary);
-  --link-hover: color-mix(in oklab, var(--primary), black 16%);
+  /* Links get their own, darker terracotta: --primary is tuned for white text on
+     a fill and only reaches ~3.7:1 as small text on the gray canvas. */
+  --link: oklch(0.5000 0.1500 36.4421);
+  --link-hover: oklch(0.4400 0.1400 36.4421);
 
   --seal: var(--destructive);
   --seal-hover: color-mix(in oklab, var(--destructive), black 10%);
@@ -129,7 +131,7 @@
   --secondary-foreground: oklch(0.9219 0 0);
   --muted: oklch(0.3095 0.0266 266.7132);
   --muted-foreground: oklch(0.7155 0 0);
-  --destructive: oklch(0.6368 0.2078 25.3313);
+  --destructive: oklch(0.5700 0.2078 25.3313); /* darkened from 0.6368: white text ≥4.5:1 (AA) */
   --destructive-foreground: oklch(1.0000 0 0);
   --border: oklch(0.3843 0.0301 269.7337);
   --input: oklch(0.3843 0.0301 269.7337);

@@ -1,45 +1,220 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-23T10:58:00+07:00",
+  "generatedAt": "2026-11-23T11:55:00+07:00",
   "title": "Design System: Carmen God Mode",
   "extensions": {
     "colorMeta": {
-      "fired-terracotta": { "role": "primary", "displayName": "Fired Terracotta", "canonical": "oklch(0.5800 0.1720 36.4421)", "tonalRamp": ["oklch(0.25 0.07 36)", "oklch(0.35 0.11 36)", "oklch(0.45 0.15 36)", "oklch(0.58 0.172 36)", "oklch(0.68 0.15 36)", "oklch(0.78 0.10 36)", "oklch(0.88 0.05 36)", "oklch(0.95 0.02 36)"] },
-      "alarm-red": { "role": "secondary", "displayName": "Alarm Red", "canonical": "oklch(0.6368 0.2078 25.3313)", "tonalRamp": ["oklch(0.25 0.08 25)", "oklch(0.35 0.13 25)", "oklch(0.47 0.18 25)", "oklch(0.6368 0.2078 25)", "oklch(0.72 0.16 25)", "oklch(0.81 0.10 25)", "oklch(0.89 0.05 25)", "oklch(0.96 0.02 25)"] },
-      "cool-mist": { "role": "neutral", "displayName": "Cool Mist", "canonical": "oklch(0.9383 0.0042 236.4993)", "tonalRamp": ["oklch(0.20 0.02 236)", "oklch(0.30 0.02 236)", "oklch(0.42 0.015 236)", "oklch(0.55 0.012 236)", "oklch(0.68 0.01 236)", "oklch(0.80 0.007 236)", "oklch(0.9383 0.0042 236)", "oklch(0.98 0.002 236)"] },
-      "paper-white": { "role": "neutral", "displayName": "Paper White", "canonical": "oklch(1 0 0)" },
-      "graphite": { "role": "neutral", "displayName": "Graphite", "canonical": "oklch(0.3211 0 0)", "tonalRamp": ["oklch(0.15 0 0)", "oklch(0.3211 0 0)", "oklch(0.42 0 0)", "oklch(0.52 0 0)", "oklch(0.64 0 0)", "oklch(0.76 0 0)", "oklch(0.87 0 0)", "oklch(0.95 0 0)"] },
-      "slate-muted": { "role": "neutral", "displayName": "Slate Muted", "canonical": "oklch(0.5510 0.0234 264.3637)" },
-      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "oklch(0.9022 0.0052 247.8822)" },
-      "quiet-fill": { "role": "neutral", "displayName": "Quiet Fill", "canonical": "oklch(0.9846 0.0017 247.8389)" },
-      "hover-fill": { "role": "neutral", "displayName": "Hover Fill", "canonical": "oklch(0.9670 0.0029 264.5419)" },
-      "rail-gray": { "role": "neutral", "displayName": "Rail Gray", "canonical": "oklch(0.9030 0.0046 258.3257)" },
-      "rail-active": { "role": "neutral", "displayName": "Rail Active", "canonical": "oklch(0.9119 0.0222 243.8174)" },
-      "rail-active-ink": { "role": "neutral", "displayName": "Rail Active Ink", "canonical": "oklch(0.3791 0.1378 265.5222)" },
-      "caution-amber": { "role": "state", "displayName": "Caution Amber", "canonical": "hsl(38 92% 45%)", "tonalRamp": ["hsl(38 92% 10%)", "hsl(38 92% 12%)", "hsl(38 80% 32%)", "hsl(38 92% 45%)", "hsl(38 92% 50%)", "hsl(38 80% 70%)", "hsl(38 80% 82%)", "hsl(38 92% 94%)"] },
-      "clear-green": { "role": "state", "displayName": "Clear Green", "canonical": "hsl(142 40% 40%)", "tonalRamp": ["hsl(142 40% 13%)", "hsl(142 40% 26%)", "hsl(142 30% 28%)", "hsl(142 40% 34%)", "hsl(142 40% 40%)", "hsl(142 40% 52%)", "hsl(142 30% 80%)", "hsl(142 40% 94%)"] },
-      "signal-blue": { "role": "state", "displayName": "Signal Blue", "canonical": "hsl(221 61% 48%)", "tonalRamp": ["hsl(217 50% 15%)", "hsl(217 45% 30%)", "hsl(221 61% 38%)", "hsl(221 61% 48%)", "hsl(217 65% 55%)", "hsl(217 70% 78%)", "hsl(221 50% 85%)", "hsl(221 61% 95%)"] }
+      "fired-terracotta": {
+        "role": "primary",
+        "displayName": "Fired Terracotta",
+        "canonical": "oklch(0.5800 0.1720 36.4421)",
+        "tonalRamp": [
+          "oklch(0.25 0.07 36)",
+          "oklch(0.35 0.11 36)",
+          "oklch(0.45 0.15 36)",
+          "oklch(0.58 0.172 36)",
+          "oklch(0.68 0.15 36)",
+          "oklch(0.78 0.10 36)",
+          "oklch(0.88 0.05 36)",
+          "oklch(0.95 0.02 36)"
+        ]
+      },
+      "alarm-red": {
+        "role": "secondary",
+        "displayName": "Alarm Red",
+        "canonical": "oklch(0.5700 0.2078 25.3313)",
+        "tonalRamp": [
+          "oklch(0.25 0.08 25)",
+          "oklch(0.35 0.13 25)",
+          "oklch(0.47 0.18 25)",
+          "oklch(0.57 0.2078 25)",
+          "oklch(0.72 0.16 25)",
+          "oklch(0.81 0.10 25)",
+          "oklch(0.89 0.05 25)",
+          "oklch(0.96 0.02 25)"
+        ]
+      },
+      "cool-mist": {
+        "role": "neutral",
+        "displayName": "Cool Mist",
+        "canonical": "oklch(0.9383 0.0042 236.4993)",
+        "tonalRamp": [
+          "oklch(0.20 0.02 236)",
+          "oklch(0.30 0.02 236)",
+          "oklch(0.42 0.015 236)",
+          "oklch(0.55 0.012 236)",
+          "oklch(0.68 0.01 236)",
+          "oklch(0.80 0.007 236)",
+          "oklch(0.9383 0.0042 236)",
+          "oklch(0.98 0.002 236)"
+        ]
+      },
+      "paper-white": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "oklch(1 0 0)"
+      },
+      "graphite": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "canonical": "oklch(0.3211 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.3211 0 0)",
+          "oklch(0.42 0 0)",
+          "oklch(0.52 0 0)",
+          "oklch(0.64 0 0)",
+          "oklch(0.76 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "slate-muted": {
+        "role": "neutral",
+        "displayName": "Slate Muted",
+        "canonical": "oklch(0.4900 0.0234 264.3637)"
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(0.9022 0.0052 247.8822)"
+      },
+      "quiet-fill": {
+        "role": "neutral",
+        "displayName": "Quiet Fill",
+        "canonical": "oklch(0.9846 0.0017 247.8389)"
+      },
+      "hover-fill": {
+        "role": "neutral",
+        "displayName": "Hover Fill",
+        "canonical": "oklch(0.9670 0.0029 264.5419)"
+      },
+      "rail-gray": {
+        "role": "neutral",
+        "displayName": "Rail Gray",
+        "canonical": "oklch(0.9030 0.0046 258.3257)"
+      },
+      "rail-active": {
+        "role": "neutral",
+        "displayName": "Rail Active",
+        "canonical": "oklch(0.9119 0.0222 243.8174)"
+      },
+      "rail-active-ink": {
+        "role": "neutral",
+        "displayName": "Rail Active Ink",
+        "canonical": "oklch(0.3791 0.1378 265.5222)"
+      },
+      "caution-amber": {
+        "role": "state",
+        "displayName": "Caution Amber",
+        "canonical": "hsl(38 92% 45%)",
+        "tonalRamp": [
+          "hsl(38 92% 10%)",
+          "hsl(38 92% 12%)",
+          "hsl(38 80% 32%)",
+          "hsl(38 92% 45%)",
+          "hsl(38 92% 50%)",
+          "hsl(38 80% 70%)",
+          "hsl(38 80% 82%)",
+          "hsl(38 92% 94%)"
+        ]
+      },
+      "clear-green": {
+        "role": "state",
+        "displayName": "Clear Green",
+        "canonical": "hsl(142 40% 40%)",
+        "tonalRamp": [
+          "hsl(142 40% 13%)",
+          "hsl(142 40% 26%)",
+          "hsl(142 30% 28%)",
+          "hsl(142 40% 34%)",
+          "hsl(142 40% 40%)",
+          "hsl(142 40% 52%)",
+          "hsl(142 30% 80%)",
+          "hsl(142 40% 94%)"
+        ]
+      },
+      "signal-blue": {
+        "role": "state",
+        "displayName": "Signal Blue",
+        "canonical": "hsl(221 61% 48%)",
+        "tonalRamp": [
+          "hsl(217 50% 15%)",
+          "hsl(217 45% 30%)",
+          "hsl(221 61% 38%)",
+          "hsl(221 61% 48%)",
+          "hsl(217 65% 55%)",
+          "hsl(217 70% 78%)",
+          "hsl(221 50% 85%)",
+          "hsl(221 61% 95%)"
+        ]
+      }
     },
     "typographyMeta": {
-      "headline": { "displayName": "Headline", "purpose": "Page title in PageHeader; one per page." },
-      "title": { "displayName": "Title", "purpose": "Card and alert titles; button faces at weight 500." },
-      "body": { "displayName": "Body", "purpose": "Default for tables, forms, ledes." },
-      "label": { "displayName": "Label", "purpose": "Uppercase eyebrows, section labels, column heads, target-bar label." },
-      "data": { "displayName": "Data", "purpose": "Literal machine values: IDs, hosts, timestamps, SQL, confirm phrases." }
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page title in PageHeader; one per page."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card and alert titles; button faces at weight 500."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default for tables, forms, ledes."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase eyebrows, section labels, column heads, target-bar label."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Literal machine values: IDs, hosts, timestamps, SQL, confirm phrases."
+      }
     },
     "shadows": [
-      { "name": "button-lift", "value": "0px 1px 3px 0px hsl(0 0% 0% / 0.10), 0px 1px 2px -1px hsl(0 0% 0% / 0.10)", "purpose": "Solid buttons only (primary, danger, warning, success)." }
+      {
+        "name": "button-lift",
+        "value": "0px 1px 3px 0px hsl(0 0% 0% / 0.10), 0px 1px 2px -1px hsl(0 0% 0% / 0.10)",
+        "purpose": "Solid buttons only (primary, danger, warning, success)."
+      }
     ],
     "motion": [
-      { "name": "press", "value": "translate: 0 1px", "purpose": "Tactile press on button/a/[role=button] :active." },
-      { "name": "page-in", "value": "220ms ease-out (opacity 0→1, translateY 4px→0)", "purpose": "Main content settle on navigation." },
-      { "name": "row-hover", "value": "150ms ease", "purpose": "Zebra row background on hover." },
-      { "name": "rail-collapse", "value": "300ms cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Sidebar width 240px ↔ 64px." },
-      { "name": "seal-hold", "value": "700ms linear (release: 140ms ease-out)", "purpose": "Seal-confirm ink fill while held." }
+      {
+        "name": "press",
+        "value": "translate: 0 1px",
+        "purpose": "Tactile press on button/a/[role=button] :active."
+      },
+      {
+        "name": "page-in",
+        "value": "220ms ease-out (opacity 0→1, translateY 4px→0)",
+        "purpose": "Main content settle on navigation."
+      },
+      {
+        "name": "row-hover",
+        "value": "150ms ease",
+        "purpose": "Zebra row background on hover."
+      },
+      {
+        "name": "rail-collapse",
+        "value": "300ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Sidebar width 240px ↔ 64px."
+      },
+      {
+        "name": "seal-hold",
+        "value": "700ms linear (release: 140ms ease-out)",
+        "purpose": "Seal-confirm ink fill while held."
+      }
     ],
     "breakpoints": [
-      { "name": "sm", "value": "640px" },
-      { "name": "md", "value": "768px" }
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      }
     ]
   },
   "components": [
@@ -57,7 +232,7 @@
       "refersTo": "button-danger",
       "description": "Destructive actions only.",
       "html": "<button class=\"ds-btn-danger\">Delete BU only</button>",
-      "css": ".ds-btn-danger { display:inline-flex; align-items:center; height:36px; padding:0 16px; border-radius:10px; border:none; font:500 14px/1 Inter, sans-serif; background:var(--destructive, oklch(0.6368 0.2078 25.33)); color:#fff; box-shadow:0px 1px 3px 0px hsl(0 0% 0% / 0.10), 0px 1px 2px -1px hsl(0 0% 0% / 0.10); cursor:pointer; transition:background-color 150ms; } .ds-btn-danger:hover { background:color-mix(in oklab, var(--destructive, oklch(0.6368 0.2078 25.33)), black 10%); } .ds-btn-danger:active { translate:0 1px; } .ds-btn-danger:focus-visible { outline:2px solid var(--ring, oklch(0.58 0.172 36.44)); outline-offset:2px; }"
+      "css": ".ds-btn-danger { display:inline-flex; align-items:center; height:36px; padding:0 16px; border-radius:10px; border:none; font:500 14px/1 Inter, sans-serif; background:var(--destructive, oklch(0.57 0.2078 25.33)); color:#fff; box-shadow:0px 1px 3px 0px hsl(0 0% 0% / 0.10), 0px 1px 2px -1px hsl(0 0% 0% / 0.10); cursor:pointer; transition:background-color 150ms; } .ds-btn-danger:hover { background:color-mix(in oklab, var(--destructive, oklch(0.57 0.2078 25.33)), black 10%); } .ds-btn-danger:active { translate:0 1px; } .ds-btn-danger:focus-visible { outline:2px solid var(--ring, oklch(0.58 0.172 36.44)); outline-offset:2px; }"
     },
     {
       "name": "Outline Button",
@@ -89,7 +264,7 @@
       "refersTo": "nav-item-active",
       "description": "Rail with wordmark, God Mode pill and nav rows.",
       "html": "<nav class=\"ds-rail\"><div class=\"ds-brand\">CARMEN <span class=\"ds-pill\">God Mode</span></div><a class=\"ds-nav ds-nav-active\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\"/><path d=\"M3 5v14a9 3 0 0 0 18 0V5\"/><path d=\"M3 12a9 3 0 0 0 18 0\"/></svg>Schemas</a><a class=\"ds-nav\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/></svg>Audit</a></nav>",
-      "css": ".ds-rail { width:240px; padding:0 8px 8px; background:var(--sidebar, oklch(0.903 0.0046 258.33)); display:flex; flex-direction:column; gap:4px; font-family:Inter, sans-serif; } .ds-brand { display:flex; align-items:center; gap:8px; padding:16px 12px; font-weight:700; font-size:18px; letter-spacing:-0.025em; color:var(--foreground, oklch(0.3211 0 0)); } .ds-pill { border-radius:4px; padding:2px 6px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; background:var(--destructive, oklch(0.6368 0.2078 25.33)); color:#fff; } .ds-nav { display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:10px; font-size:14px; font-weight:500; text-decoration:none; color:var(--muted-foreground, oklch(0.551 0.0234 264.36)); transition:background-color 150ms, color 150ms; } .ds-nav:hover, .ds-nav-active { background:var(--sidebar-accent, oklch(0.9119 0.0222 243.82)); color:var(--sidebar-accent-foreground, oklch(0.3791 0.1378 265.52)); } .ds-nav:focus-visible { outline:2px solid var(--ring, oklch(0.58 0.172 36.44)); outline-offset:2px; }"
+      "css": ".ds-rail { width:240px; padding:0 8px 8px; background:var(--sidebar, oklch(0.903 0.0046 258.33)); display:flex; flex-direction:column; gap:4px; font-family:Inter, sans-serif; } .ds-brand { display:flex; align-items:center; gap:8px; padding:16px 12px; font-weight:700; font-size:18px; letter-spacing:-0.025em; color:var(--foreground, oklch(0.3211 0 0)); } .ds-pill { border-radius:4px; padding:2px 6px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; background:var(--destructive, oklch(0.57 0.2078 25.33)); color:#fff; } .ds-nav { display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:10px; font-size:14px; font-weight:500; text-decoration:none; color:var(--muted-foreground, oklch(0.551 0.0234 264.36)); transition:background-color 150ms, color 150ms; } .ds-nav:hover, .ds-nav-active { background:var(--sidebar-accent, oklch(0.9119 0.0222 243.82)); color:var(--sidebar-accent-foreground, oklch(0.3791 0.1378 265.52)); } .ds-nav:focus-visible { outline:2px solid var(--ring, oklch(0.58 0.172 36.44)); outline-offset:2px; }"
     },
     {
       "name": "Live-Target Bar",
@@ -97,14 +272,14 @@
       "refersTo": "target-bar-live",
       "description": "Persistent strip naming the live database; the first of two loud elements.",
       "html": "<div class=\"ds-target\" role=\"status\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg><span class=\"ds-target-label\">Live</span><span style=\"opacity:.5\">·</span><span class=\"ds-target-host\">dev.example:6432</span><span class=\"ds-target-warn\">Every write is permanent</span></div>",
-      "css": ".ds-target { display:flex; align-items:center; gap:8px; height:32px; padding:0 24px; font:12px/1 Inter, sans-serif; background:var(--destructive, oklch(0.6368 0.2078 25.33)); color:#fff; } .ds-target-label, .ds-target-warn { font-weight:600; text-transform:uppercase; letter-spacing:0.05em; } .ds-target-host { font-family:'JetBrains Mono', ui-monospace, monospace; } .ds-target-warn { margin-left:auto; font-weight:500; }"
+      "css": ".ds-target { display:flex; align-items:center; gap:8px; height:32px; padding:0 24px; font:12px/1 Inter, sans-serif; background:var(--destructive, oklch(0.57 0.2078 25.33)); color:#fff; } .ds-target-label, .ds-target-warn { font-weight:600; text-transform:uppercase; letter-spacing:0.05em; } .ds-target-host { font-family:'JetBrains Mono', ui-monospace, monospace; } .ds-target-warn { margin-left:auto; font-weight:500; }"
     },
     {
       "name": "Seal Confirm",
       "kind": "custom",
       "description": "Type-to-arm, press-and-hold ceremony for irreversible writes.",
       "html": "<div class=\"ds-seal-wrap\"><label class=\"ds-seal-label\">Type <code>BU-2N0F1YB7</code> to arm:</label><button class=\"ds-seal\"><span class=\"ds-seal-ink\"></span><span class=\"ds-seal-face\">Press &amp; hold to confirm</span></button></div>",
-      "css": ".ds-seal-wrap { display:flex; flex-direction:column; gap:12px; width:360px; font-family:Inter, sans-serif; } .ds-seal-label { font-size:14px; font-weight:500; color:var(--foreground, oklch(0.3211 0 0)); } .ds-seal-label code { font:12px 'JetBrains Mono', monospace; padding:2px 6px; border-radius:4px; background:var(--muted, oklch(0.9846 0.0017 247.84)); } .ds-seal { position:relative; height:44px; width:100%; overflow:hidden; border-radius:10px; border:1px solid var(--destructive, oklch(0.6368 0.2078 25.33)); background:transparent; cursor:pointer; } .ds-seal-ink { position:absolute; inset:0; transform-origin:left; transform:scaleX(0); background:var(--destructive, oklch(0.6368 0.2078 25.33)); transition:transform 140ms ease-out; } .ds-seal:active .ds-seal-ink { transform:scaleX(1); transition:transform 700ms linear; } .ds-seal-face { position:relative; font-size:14px; font-weight:500; text-transform:uppercase; letter-spacing:0.12em; color:var(--destructive, oklch(0.6368 0.2078 25.33)); } .ds-seal:active .ds-seal-face { color:#fff; } .ds-seal:focus-visible { outline:2px solid var(--ring, oklch(0.58 0.172 36.44)); outline-offset:2px; }"
+      "css": ".ds-seal-wrap { display:flex; flex-direction:column; gap:12px; width:360px; font-family:Inter, sans-serif; } .ds-seal-label { font-size:14px; font-weight:500; color:var(--foreground, oklch(0.3211 0 0)); } .ds-seal-label code { font:12px 'JetBrains Mono', monospace; padding:2px 6px; border-radius:4px; background:var(--muted, oklch(0.9846 0.0017 247.84)); } .ds-seal { position:relative; height:44px; width:100%; overflow:hidden; border-radius:10px; border:1px solid var(--destructive, oklch(0.57 0.2078 25.33)); background:transparent; cursor:pointer; } .ds-seal-ink { position:absolute; inset:0; transform-origin:left; transform:scaleX(0); background:var(--destructive, oklch(0.57 0.2078 25.33)); transition:transform 140ms ease-out; } .ds-seal:active .ds-seal-ink { transform:scaleX(1); transition:transform 700ms linear; } .ds-seal-face { position:relative; font-size:14px; font-weight:500; text-transform:uppercase; letter-spacing:0.12em; color:var(--destructive, oklch(0.57 0.2078 25.33)); } .ds-seal:active .ds-seal-face { color:#fff; } .ds-seal:focus-visible { outline:2px solid var(--ring, oklch(0.58 0.172 36.44)); outline-offset:2px; }"
     }
   ],
   "narrative": {
@@ -118,11 +293,36 @@
       "Light and dark themes are both first-class, switched by a .dark class on <html>."
     ],
     "rules": [
-      { "name": "The Red Means Danger Rule", "body": "Alarm red appears only where a write is irreversible or the target is live. It is never used for emphasis, branding or decoration.", "section": "colors" },
-      { "name": "The One Warm Voice Rule", "body": "Fired Terracotta is the only saturated hue in routine UI. Each view gets one primary button. Everything else is outline or ghost.", "section": "colors" },
-      { "name": "The Never Colour Alone Rule", "body": "Every status pairs its colour with an icon and words. The target bar has a triangle icon plus \"Every write is permanent\", and each alert has its own lucide icon.", "section": "colors" },
-      { "name": "The Mono Is Literal Rule", "body": "Mono type is used only for values the system reads exactly (identifiers, phrases to type, SQL). It is never used for emphasis.", "section": "typography" },
-      { "name": "The Border Before Shadow Rule", "body": "A new container separates itself with a Hairline border and a surface tone, never with a shadow.", "section": "elevation" }
+      {
+        "name": "The Red Means Danger Rule",
+        "body": "Alarm red appears only where a write is irreversible or the target is live. It is never used for emphasis, branding or decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Warm Voice Rule",
+        "body": "Fired Terracotta is the only saturated hue in routine UI. Each view gets one primary button. Everything else is outline or ghost.",
+        "section": "colors"
+      },
+      {
+        "name": "The Red Text Rule",
+        "body": "Red used as text (errors, \"Armed\", inline danger links, the seal face) uses --danger-subtle-foreground, never --danger. That tone passes AA on both themes; the --danger fill is tuned for white text on top of it (≈5:1) and is too dark to read as text in dark mode.",
+        "section": "colors"
+      },
+      {
+        "name": "The Never Colour Alone Rule",
+        "body": "Every status pairs its colour with an icon and words. The target bar has a triangle icon plus \"Every write is permanent\", and each alert has its own lucide icon.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono Is Literal Rule",
+        "body": "Mono type is used only for values the system reads exactly (identifiers, phrases to type, SQL). It is never used for emphasis.",
+        "section": "typography"
+      },
+      {
+        "name": "The Border Before Shadow Rule",
+        "body": "A new container separates itself with a Hairline border and a surface tone, never with a shadow.",
+        "section": "elevation"
+      }
     ],
     "dos": [
       "Do consume god-mode token names (bg-surface, text-foreground-muted, bg-accent, bg-danger). Re-skinning happens in the adapter layer of app/globals.css, not in components.",

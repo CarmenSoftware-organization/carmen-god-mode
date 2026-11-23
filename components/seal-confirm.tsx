@@ -144,7 +144,7 @@ export function SealConfirm({
             showHold || sealed
               ? "text-danger-foreground"
               : canSeal
-                ? "text-seal"
+                ? "text-danger-subtle-foreground"
                 : "text-foreground-subtle",
           )}
         >

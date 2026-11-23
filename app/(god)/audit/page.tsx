@@ -129,7 +129,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
                         role="img"
                         aria-label="sealed"
                         title="Sealed — irreversible"
-                        className="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] border-seal text-[9px] leading-none text-seal"
+                        className="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] border-seal text-[9px] leading-none text-danger-subtle-foreground"
                       >
                         ●
                       </span>

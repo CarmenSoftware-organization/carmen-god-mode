@@ -57,7 +57,7 @@ export function LoginTabs({ gatewayEnabled }: { gatewayEnabled: boolean }) {
             <Input id="password" name="password" type="password" required />
           </div>
           {gwState.error && (
-            <p role="alert" className="text-sm font-medium text-danger">
+            <p role="alert" className="text-sm font-medium text-danger-subtle-foreground">
               {gwState.error}
             </p>
           )}
@@ -83,7 +83,7 @@ export function LoginTabs({ gatewayEnabled }: { gatewayEnabled: boolean }) {
             <Input id="secret" name="secret" type="password" required />
           </div>
           {secState.error && (
-            <p role="alert" className="text-sm font-medium text-danger">
+            <p role="alert" className="text-sm font-medium text-danger-subtle-foreground">
               {secState.error}
             </p>
           )}
