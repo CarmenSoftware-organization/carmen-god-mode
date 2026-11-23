@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/session";
 import { readJsonObject, isOptionalString } from "@/lib/request-body";
-import { executeDropSchema, isProtectedSchema } from "@/lib/drop-schema";
+import { executeDropSchema, inUseReason, isProtectedSchema } from "@/lib/drop-schema";
 import { streamOperation } from "@/lib/progress";
 
 export const runtime = "nodejs";
@@ -29,6 +29,13 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json(
       { error: `Refusing to drop the protected schema "${schema}".` },
       { status: 400 },
+    );
+  }
+  const inUse = await inUseReason(schema);
+  if (inUse) {
+    return Response.json(
+      { error: `Refusing to drop schema "${schema}": ${inUse}.` },
+      { status: 409 },
     );
   }
   // The confirm phrase for a schema drop is the schema name itself (mirrors the

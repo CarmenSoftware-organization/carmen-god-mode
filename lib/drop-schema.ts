@@ -4,6 +4,7 @@ import { env } from "@/lib/env";
 import { writeAudit, ensureAuditTable } from "@/lib/audit";
 import { currentActor } from "@/lib/write";
 import type { OnProgress } from "@/lib/progress";
+import { loadSchemaUsage } from "@/lib/registry";
 
 /**
  * The system schema is this console's own backbone — the registry, auth, and
@@ -34,6 +35,17 @@ export function isProtectedSchema(schema: string): boolean {
 }
 
 /**
+ * Human-readable reason a schema may not be dropped because a live business
+ * unit still points at it, or `null` if none does. Removing such a tenant goes
+ * through the business-unit delete, which carries the pool guard.
+ */
+export async function inUseReason(schema: string): Promise<string | null> {
+  const codes = (await loadSchemaUsage(schema)).get(schema) ?? [];
+  if (codes.length === 0) return null;
+  return `in use by business unit ${codes.join(", ")} — delete the business unit instead`;
+}
+
+/**
  * Permanently `DROP SCHEMA <schema> CASCADE` and record a DROP_SCHEMA audit
  * entry in the same transaction. Refuses the system schema (fail-closed, before
  * any DB work). Presentation code must still gate on a typed-phrase +
@@ -45,6 +57,10 @@ export async function executeDropSchema(
 ): Promise<{ droppedSchema: string }> {
   if (isProtectedSchema(schema)) {
     throw new Error(`Refusing to drop the protected schema "${schema}".`);
+  }
+  const inUse = await inUseReason(schema);
+  if (inUse) {
+    throw new Error(`Refusing to drop schema "${schema}": ${inUse}.`);
   }
   const actor = await currentActor();
   opts.onProgress?.({ type: "total", total: 1 });

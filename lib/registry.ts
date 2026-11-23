@@ -27,6 +27,31 @@ export async function listBusinessUnits(): Promise<BusinessUnit[]> {
   }
 }
 
+/**
+ * Tenant schema → codes of the live (not soft-deleted) business units whose
+ * `db_schema` points at it. Pass `schema` to look up just that one. A schema in
+ * this map holds a live tenant's data and must not be dropped on its own.
+ */
+export async function loadSchemaUsage(schema?: string): Promise<Map<string, string[]>> {
+  const reg = qualified(env().systemSchemaName, "tb_business_unit");
+  const params: string[] = schema === undefined ? [] : [schema];
+  try {
+    const rows = (await getSql().unsafe(
+      `SELECT db_schema, code FROM ${reg}
+       WHERE db_schema IS NOT NULL AND deleted_at IS NULL
+       ${schema === undefined ? "" : "AND db_schema = $1"}
+       ORDER BY code`,
+      params,
+    )) as unknown as { db_schema: string; code: string }[];
+    const usage = new Map<string, string[]>();
+    for (const r of rows) usage.set(r.db_schema, [...(usage.get(r.db_schema) ?? []), r.code]);
+    return usage;
+  } catch (err: unknown) {
+    if ((err as { code?: string })?.code === "42P01") return new Map();
+    throw err;
+  }
+}
+
 export async function resolveTenantSchema(businessUnitId: string): Promise<string | null> {
   const reg = qualified(env().systemSchemaName, "tb_business_unit");
   const rows = await getSql().unsafe(

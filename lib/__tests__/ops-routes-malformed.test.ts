@@ -33,6 +33,7 @@ const executeDropSchema = vi.fn(async () => ({ droppedSchema: "x" }));
 vi.mock("@/lib/drop-schema", () => ({
   executeDropSchema: () => executeDropSchema(),
   isProtectedSchema: (s: string) => s === "CARMEN_SYSTEM" || s === "public",
+  inUseReason: async () => null,
 }));
 
 vi.mock("@/lib/audit", () => ({ ensureAuditTable: vi.fn(async () => {}), writeAudit: vi.fn(async () => {}) }));

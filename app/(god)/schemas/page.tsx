@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { BusinessUnitsTable } from "@/components/business-units-table";
-import { listBusinessUnits, listSelectableSchemas } from "@/lib/registry";
+import { listBusinessUnits, listSelectableSchemas, loadSchemaUsage } from "@/lib/registry";
 import { Button } from "@/components/ui/button";
 import { PageHeader, SectionLabel } from "@/components/ui/page-header";
 import { isProtectedSchema } from "@/lib/drop-schema";
@@ -11,8 +11,8 @@ import { env } from "@/lib/env";
 export const dynamic = "force-dynamic";
 
 export default async function SchemasPage() {
-  const [bus, sel, pools] = await Promise.all([
-    listBusinessUnits(), listSelectableSchemas(), loadAllPools(),
+  const [bus, sel, pools, usage] = await Promise.all([
+    listBusinessUnits(), listSelectableSchemas(), loadAllPools(), loadSchemaUsage(),
   ]);
   // pools === null on a registry that predates the pool split: nothing to flag.
   const connected = parseConnectionIdentity(env().databaseUrl);
@@ -69,6 +69,13 @@ export default async function SchemasPage() {
                     {isProtectedSchema(s) ? (
                       <span className="text-xs font-medium uppercase tracking-wider text-foreground-subtle">
                         Protected
+                      </span>
+                    ) : usage.has(s) ? (
+                      <span
+                        className="text-xs font-medium uppercase tracking-wider text-foreground-subtle"
+                        title="Delete the business unit to remove this schema"
+                      >
+                        In use · {usage.get(s)!.join(", ")}
                       </span>
                     ) : (
                       <Link

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { listSchemaNames } from "@/lib/introspect";
-import { protectedReason } from "@/lib/drop-schema";
+import { inUseReason, protectedReason } from "@/lib/drop-schema";
 import { DropSchemaConfirm } from "@/components/drop-schema-confirm";
 import { SchemaBanner } from "@/components/schema-banner";
 
@@ -16,7 +16,7 @@ export default async function DropSchemaPage({
 
   // Defense in depth: the list hides Delete for protected schemas, but this
   // page must refuse them too — never render a confirm ceremony for one.
-  const reason = protectedReason(schema);
+  const reason = protectedReason(schema) ?? (await inUseReason(schema));
   if (reason) {
     return (
       <div className="space-y-4">
