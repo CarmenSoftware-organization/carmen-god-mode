@@ -16,6 +16,7 @@ export function BusinessUnitsTable({
   system,
   poolMismatchIds = [],
   sharedSchemas = {},
+  clusters = {},
 }: {
   bus: BusinessUnit[];
   system: string;
@@ -23,6 +24,8 @@ export function BusinessUnitsTable({
   poolMismatchIds?: string[];
   /** Tenant schema → codes of the live business units that use it. */
   sharedSchemas?: Record<string, string[]>;
+  /** Cluster id → display info, for the parent-cluster column. */
+  clusters?: Record<string, { code: string; name: string; deleted: boolean }>;
 }) {
   const mismatched = new Set(poolMismatchIds);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -79,6 +82,7 @@ export function BusinessUnitsTable({
             </Th>
             <Th>Code</Th>
             <Th>Name</Th>
+            <Th>Cluster</Th>
             <Th>Active</Th>
             <Th>Tenant schema</Th>
             <Th className="w-28 text-right">Actions</Th>
@@ -87,7 +91,7 @@ export function BusinessUnitsTable({
         <TBody>
           {bus.length === 0 ? (
             <tr>
-              <td colSpan={6}>
+              <td colSpan={7}>
                 <EmptyState icon="package" title="No business units" />
               </td>
             </tr>
@@ -110,6 +114,19 @@ export function BusinessUnitsTable({
                   </Td>
                   <Td className="font-mono text-xs">{b.code}</Td>
                   <Td>{b.name}</Td>
+                  <Td className="font-mono text-xs">
+                    {b.clusterId && clusters[b.clusterId] ? (
+                      <Link
+                        href={`/clusters/${encodeURIComponent(b.clusterId)}/edit`}
+                        title={clusters[b.clusterId].name}
+                        className={cn("hover:underline", clusters[b.clusterId].deleted && "line-through text-foreground-muted")}
+                      >
+                        {clusters[b.clusterId].code}
+                      </Link>
+                    ) : (
+                      <span className="text-foreground-subtle">{b.clusterId ? "unknown" : "none"}</span>
+                    )}
+                  </Td>
                   <Td>
                     {b.deletedAt ? (
                       <Badge variant="danger">Deleted</Badge>

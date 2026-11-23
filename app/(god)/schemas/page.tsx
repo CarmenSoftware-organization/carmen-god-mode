@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { BusinessUnitsTable } from "@/components/business-units-table";
-import { listBusinessUnits, listSelectableSchemas, loadSchemaUsage } from "@/lib/registry";
+import { listBusinessUnits, listClusters, listSelectableSchemas, loadSchemaUsage } from "@/lib/registry";
 import { Button } from "@/components/ui/button";
 import { PageHeader, SectionLabel } from "@/components/ui/page-header";
 import { isProtectedSchema } from "@/lib/drop-schema";
@@ -11,9 +11,12 @@ import { env } from "@/lib/env";
 export const dynamic = "force-dynamic";
 
 export default async function SchemasPage() {
-  const [bus, sel, pools, usage] = await Promise.all([
-    listBusinessUnits(), listSelectableSchemas(), loadAllPools(), loadSchemaUsage(),
+  const [bus, sel, pools, usage, clusterRows] = await Promise.all([
+    listBusinessUnits(), listSelectableSchemas(), loadAllPools(), loadSchemaUsage(), listClusters(),
   ]);
+  const clusters = Object.fromEntries(
+    clusterRows.map((c) => [c.id, { code: c.code, name: c.name, deleted: c.deletedAt !== null }]),
+  );
   // pools === null on a registry that predates the pool split: nothing to flag.
   const connected = parseConnectionIdentity(env().databaseUrl);
   const poolMismatchIds = (pools ?? [])
@@ -47,6 +50,7 @@ export default async function SchemasPage() {
             system={sel.system}
             poolMismatchIds={poolMismatchIds}
             sharedSchemas={Object.fromEntries(usage)}
+            clusters={clusters}
           />
         </section>
 
