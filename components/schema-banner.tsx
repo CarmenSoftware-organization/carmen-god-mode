@@ -22,14 +22,15 @@ export function SchemaBanner({ schema }: { schema: string | null }) {
     >
       <span
         className={cn(
-          "rounded-sm px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]",
-          isSystem ? "bg-black/25" : "bg-black/15",
+          "rounded-sm px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider",
+          // Tenant: dark text on amber, so the chip lightens (a dark wash cut it to ~4:1).
+          isSystem ? "bg-black/25" : "bg-white/35",
         )}
       >
         {isSystem ? "System" : "Tenant"}
       </span>
 
-      <span className="flex min-w-0 items-center gap-1.5 font-mono text-[13px]">
+      <span className="flex min-w-0 items-center gap-1.5 font-mono text-xs">
         <span aria-hidden="true" className="opacity-60">▸</span>
         <span className="truncate">{schema}</span>
       </span>
