@@ -50,48 +50,67 @@ export default async function SchemasPage() {
           />
         </section>
 
-        {/* All schemas */}
-        <section>
-          <SectionLabel>All schemas</SectionLabel>
-          <div className="overflow-hidden rounded-md border border-border bg-surface">
-            <div className="flex items-center justify-between border-b border-border px-4 py-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Schema</span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Actions</span>
-            </div>
-            <ul>
-              {/* Schemas a live BU uses are already listed in the Business units table above. */}
-              {sel.allSchemas.filter((s) => isProtectedSchema(s) || !usage.has(s)).map((s) => (
-                <li
-                  key={s}
-                  className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5 transition-colors last:border-0 hover:bg-surface-hover"
-                >
-                  <Link
-                    href={`/${encodeURIComponent(s)}/tables`}
-                    className="flex min-w-0 flex-1 items-center gap-2"
-                  >
-                    <span className="truncate font-mono text-[13px] text-foreground">{s}</span>
-                  </Link>
-                  <div className="flex shrink-0 items-center gap-4">
-                    {isProtectedSchema(s) ? (
-                      <span className="text-xs font-medium uppercase tracking-wider text-foreground-subtle">
-                        Protected
-                      </span>
-                    ) : (
-                      <Link
-                        href={`/schemas/${encodeURIComponent(s)}/delete`}
-                        className="text-xs font-semibold uppercase tracking-wider text-danger transition-colors hover:text-danger-hover"
-                      >
-                        Delete
-                      </Link>
-                    )}
-                    <ChevronRight className="h-3.5 w-3.5 text-foreground-subtle" aria-hidden="true" />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
+        {/* Unprotected schemas a live BU doesn't use (those are in the table above). */}
+        <SchemaList
+          label="Other schemas"
+          schemas={sel.allSchemas.filter((s) => !isProtectedSchema(s) && !usage.has(s))}
+          action={(s) => (
+            <Link
+              href={`/schemas/${encodeURIComponent(s)}/delete`}
+              className="text-xs font-semibold uppercase tracking-wider text-danger transition-colors hover:text-danger-hover"
+            >
+              Delete
+            </Link>
+          )}
+        />
+
+        {/* System, public and PROTECTED_SCHEMAS: never droppable from here. */}
+        <SchemaList
+          label="Protected schemas"
+          schemas={sel.allSchemas.filter(isProtectedSchema)}
+          action={() => (
+            <span className="text-xs font-medium uppercase tracking-wider text-foreground-subtle">
+              Protected
+            </span>
+          )}
+        />
       </div>
     </div>
+  );
+}
+
+function SchemaList({
+  label, schemas, action,
+}: { label: string; schemas: string[]; action: (schema: string) => React.ReactNode }) {
+  return (
+    <section>
+      <SectionLabel>{label}</SectionLabel>
+      <div className="overflow-hidden rounded-md border border-border bg-surface">
+        <div className="flex items-center justify-between border-b border-border px-4 py-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Schema</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Actions</span>
+        </div>
+        {schemas.length === 0 ? (
+          <p className="px-4 py-2.5 text-sm text-foreground-subtle">None</p>
+        ) : (
+          <ul>
+            {schemas.map((s) => (
+              <li
+                key={s}
+                className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5 transition-colors last:border-0 hover:bg-surface-hover"
+              >
+                <Link href={`/${encodeURIComponent(s)}/tables`} className="flex min-w-0 flex-1 items-center gap-2">
+                  <span className="truncate font-mono text-[13px] text-foreground">{s}</span>
+                </Link>
+                <div className="flex shrink-0 items-center gap-4">
+                  {action(s)}
+                  <ChevronRight className="h-3.5 w-3.5 text-foreground-subtle" aria-hidden="true" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   );
 }
