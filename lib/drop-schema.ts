@@ -4,6 +4,7 @@ import { env } from "@/lib/env";
 import { writeAudit, ensureAuditTable } from "@/lib/audit";
 import { currentActor } from "@/lib/write";
 import type { OnProgress } from "@/lib/progress";
+import { loadSchemaUsage } from "@/lib/registry";
 
 /**
  * The system schema is this console's own backbone — the registry, auth, and
@@ -16,8 +17,9 @@ export function isSystemSchema(schema: string): boolean {
 
 /**
  * Human-readable reason a schema is protected from dropping, or `null` if it may
- * be dropped. Protected: the system schema, and Postgres' default `public`
- * schema (dropping it breaks extensions, default privileges, and search_path).
+ * be dropped. Protected: the system schema, Postgres' default `public` schema
+ * (dropping it breaks extensions, default privileges, and search_path), and any
+ * schema named in `PROTECTED_SCHEMAS` (exact, case-sensitive match).
  */
 export function protectedReason(schema: string): string | null {
   if (isSystemSchema(schema)) {
@@ -26,11 +28,25 @@ export function protectedReason(schema: string): string | null {
   if (schema === "public") {
     return 'the database’s default "public" schema';
   }
+  if (env().protectedSchemas.includes(schema)) {
+    return "listed in PROTECTED_SCHEMAS";
+  }
   return null;
 }
 
 export function isProtectedSchema(schema: string): boolean {
   return protectedReason(schema) !== null;
+}
+
+/**
+ * Human-readable reason a schema may not be dropped because a live business
+ * unit still points at it, or `null` if none does. Removing such a tenant goes
+ * through the business-unit delete, which carries the pool guard.
+ */
+export async function inUseReason(schema: string): Promise<string | null> {
+  const codes = (await loadSchemaUsage(schema)).get(schema) ?? [];
+  if (codes.length === 0) return null;
+  return `in use by business unit ${codes.join(", ")} — delete the business unit instead`;
 }
 
 /**
@@ -45,6 +61,10 @@ export async function executeDropSchema(
 ): Promise<{ droppedSchema: string }> {
   if (isProtectedSchema(schema)) {
     throw new Error(`Refusing to drop the protected schema "${schema}".`);
+  }
+  const inUse = await inUseReason(schema);
+  if (inUse) {
+    throw new Error(`Refusing to drop schema "${schema}": ${inUse}.`);
   }
   const actor = await currentActor();
   opts.onProgress?.({ type: "total", total: 1 });

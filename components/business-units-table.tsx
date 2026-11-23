@@ -93,7 +93,7 @@ export function BusinessUnitsTable({
               const key = buKey(b);
               const isChecked = selected.has(key);
               return (
-                <TR key={b.id} className={cn(isChecked && "bg-accent/5")}>
+                <TR key={b.id} className={cn(isChecked && "bg-accent/5", b.deletedAt && "text-foreground-muted")}>
                   <Td className="w-10">
                     <Checkbox
                       aria-label={`Select row ${i + 1}`}
@@ -104,7 +104,9 @@ export function BusinessUnitsTable({
                   <Td className="font-mono text-xs">{b.code}</Td>
                   <Td>{b.name}</Td>
                   <Td>
-                    {b.isActive ? (
+                    {b.deletedAt ? (
+                      <Badge variant="danger">Deleted</Badge>
+                    ) : b.isActive ? (
                       <Badge variant="success">Active</Badge>
                     ) : (
                       <Badge variant="neutral">Inactive</Badge>

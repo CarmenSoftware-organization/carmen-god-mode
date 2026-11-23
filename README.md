@@ -36,6 +36,10 @@ The `CARMEN_SYSTEM.tb_god_mode_audit` table is created automatically on the firs
 - `ALLOW_DANGER_OPS` — set to `true` to expose the danger zone
   (`db:migrate:reset`). Off by default: the group is hidden from the page and
   the API refuses the op with 403. Changing it requires a server restart.
+- `PROTECTED_SCHEMAS` — comma-separated schemas `/schemas` may never drop
+  (exact, case-sensitive), e.g. `CARMEN_SYSTEM,CARMEN_FILE,CRONJOBS,ISO_PROD,ISO,QA_MANUAL,public`.
+  The system schema and `public` are always protected regardless. Requires a
+  server restart.
 
 Migrations run against the DB this instance is pointed at (the banner shows the
 target). Writes require typing the schema name; resets (hidden unless ALLOW_DANGER_OPS=true) need a second

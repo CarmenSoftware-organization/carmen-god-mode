@@ -15,6 +15,7 @@ const schema = z.object({
   SYSTEM_DIRECT_URL: z.string().min(1).optional(),
   BACKSTAGE_PACKAGE_DIR: z.string().min(1).optional(),
   ALLOW_DANGER_OPS: z.string().optional(),
+  PROTECTED_SCHEMAS: z.string().optional(),
 });
 
 export type Env = {
@@ -33,6 +34,8 @@ export type Env = {
   systemDirectUrl: string;
   platformPackageDir?: string;
   allowDangerOps: boolean;
+  /** Extra schemas that may never be dropped (system schema + `public` are always protected). */
+  protectedSchemas: string[];
 };
 
 export function loadEnv(raw: Record<string, string | undefined>): Env {
@@ -53,6 +56,8 @@ export function loadEnv(raw: Record<string, string | undefined>): Env {
     systemDirectUrl: p.SYSTEM_DIRECT_URL ?? p.SYSTEM_DATABASE_URL,
     platformPackageDir: p.BACKSTAGE_PACKAGE_DIR,
     allowDangerOps: p.ALLOW_DANGER_OPS === "true",
+    protectedSchemas: (p.PROTECTED_SCHEMAS ?? "")
+      .split(",").map((x) => x.trim()).filter((x) => x.length > 0),
   };
 }
 

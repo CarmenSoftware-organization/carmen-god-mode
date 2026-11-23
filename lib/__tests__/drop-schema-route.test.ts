@@ -7,6 +7,7 @@ const executeDropSchema = vi.fn(async (...args: unknown[]) => ({ droppedSchema: 
 vi.mock("@/lib/drop-schema", () => ({
   executeDropSchema: (schema: string, opts?: unknown) => executeDropSchema(schema, opts),
   isProtectedSchema: (s: string) => s === "CARMEN_SYSTEM" || s === "public",
+  inUseReason: async () => null,
 }));
 
 afterEach(() => vi.clearAllMocks());

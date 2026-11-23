@@ -21,6 +21,7 @@ vi.mock("@/lib/cascade", () => ({
 vi.mock("@/lib/registry", () => ({
   resolveTenantSchema: vi.fn(async () => null),
   resolveTenantSchemasForCluster: vi.fn(async () => []),
+  sharedSchemaReason: vi.fn(async () => null),
   listBusinessUnits: vi.fn(async () => []),
 }));
 vi.mock("@/lib/db-pool", () => ({
@@ -33,6 +34,7 @@ const executeDropSchema = vi.fn(async () => ({ droppedSchema: "x" }));
 vi.mock("@/lib/drop-schema", () => ({
   executeDropSchema: () => executeDropSchema(),
   isProtectedSchema: (s: string) => s === "CARMEN_SYSTEM" || s === "public",
+  inUseReason: async () => null,
 }));
 
 vi.mock("@/lib/audit", () => ({ ensureAuditTable: vi.fn(async () => {}), writeAudit: vi.fn(async () => {}) }));
