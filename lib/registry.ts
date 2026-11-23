@@ -5,7 +5,9 @@ import { listSchemaNames } from "@/lib/introspect";
 
 export type BusinessUnit = { id: string; code: string; name: string; clusterId: string | null; isActive: boolean; tenantSchema: string | null;
   /** ISO timestamp of the soft delete; null/absent for a live BU. */
-  deletedAt?: string | null };
+  deletedAt?: string | null;
+  /** Inventory costing method (enum_calculation_method, e.g. average / fifo); null if unset. */
+  calculationMethod?: string | null };
 
 export async function listBusinessUnits(): Promise<BusinessUnit[]> {
   const reg = qualified(env().systemSchemaName, "tb_business_unit");
@@ -15,16 +17,18 @@ export async function listBusinessUnits(): Promise<BusinessUnit[]> {
               COALESCE(is_active, true) AS is_active,
               db_schema AS tenant_schema,
               -- via jsonb so a registry without the column still reads (as null)
-              to_jsonb(b) ->> 'deleted_at' AS deleted_at
+              to_jsonb(b) ->> 'deleted_at' AS deleted_at,
+              to_jsonb(b) ->> 'calculation_method' AS calculation_method
        FROM ${reg} b ORDER BY code`,
     )) as unknown as {
       id: string; code: string; name: string; cluster_id: string | null;
       is_active: boolean; tenant_schema: string | null; deleted_at: string | null;
+      calculation_method: string | null;
     }[];
     return rows.map((r) => ({
       id: r.id, code: r.code, name: r.name, clusterId: r.cluster_id ?? null,
       isActive: r.is_active, tenantSchema: r.tenant_schema ?? null,
-      deletedAt: r.deleted_at ?? null,
+      deletedAt: r.deleted_at ?? null, calculationMethod: r.calculation_method ?? null,
     }));
   } catch (err: unknown) {
     if ((err as { code?: string })?.code === "42P01") return [];

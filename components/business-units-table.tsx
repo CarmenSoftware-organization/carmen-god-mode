@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SortableTh, compareCells, nextSort, type SortState } from "@/components/ui/sortable-th";
 
-type SortKey = "code" | "name" | "cluster" | "status" | "schema";
+type SortKey = "code" | "name" | "cluster" | "method" | "status" | "schema";
 
 export function BusinessUnitsTable({
   bus,
@@ -39,6 +39,7 @@ export function BusinessUnitsTable({
       case "code": return b.code;
       case "name": return b.name;
       case "cluster": return b.clusterId ? clusters[b.clusterId]?.code ?? null : null;
+      case "method": return b.calculationMethod ?? null;
       case "status": return b.deletedAt ? "Deleted" : b.isActive ? "Active" : "Inactive";
       case "schema": return b.tenantSchema;
     }
@@ -102,6 +103,7 @@ export function BusinessUnitsTable({
             <SortableTh label="Code" sortKey="code" sort={sort} onSort={onSort} />
             <SortableTh label="Name" sortKey="name" sort={sort} onSort={onSort} />
             <SortableTh label="Cluster" sortKey="cluster" sort={sort} onSort={onSort} />
+            <SortableTh label="Method" sortKey="method" sort={sort} onSort={onSort} />
             <SortableTh label="Active" sortKey="status" sort={sort} onSort={onSort} />
             <SortableTh label="Tenant schema" sortKey="schema" sort={sort} onSort={onSort} />
             <Th className="w-28 text-right">Actions</Th>
@@ -110,7 +112,7 @@ export function BusinessUnitsTable({
         <TBody>
           {bus.length === 0 ? (
             <tr>
-              <td colSpan={7}>
+              <td colSpan={8}>
                 <EmptyState icon="package" title="No business units" />
               </td>
             </tr>
@@ -145,6 +147,9 @@ export function BusinessUnitsTable({
                     ) : (
                       <span className="text-foreground-subtle">{b.clusterId ? "unknown" : "none"}</span>
                     )}
+                  </Td>
+                  <Td className="font-mono text-xs uppercase">
+                    {b.calculationMethod ?? <span className="normal-case text-foreground-subtle">none</span>}
                   </Td>
                   <Td>
                     {b.deletedAt ? (
