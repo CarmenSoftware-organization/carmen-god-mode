@@ -49,7 +49,7 @@ export function OperationProgress({
         <div className="text-xs text-danger-subtle-foreground">
           <p>{state.error}</p>
           {rolledBackOnError && (
-            <p className="mt-0.5 text-danger">
+            <p className="mt-0.5 text-danger-subtle-foreground">
               No changes were applied. The operation was rolled back.
             </p>
           )}

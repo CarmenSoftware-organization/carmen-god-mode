@@ -4,11 +4,11 @@ description: Direct admin console over the live Carmen inventory database, a sib
 colors:
   fired-terracotta: "oklch(0.5800 0.1720 36.4421)"
   on-primary: "oklch(1.0000 0 0)"
-  alarm-red: "oklch(0.6368 0.2078 25.3313)"
+  alarm-red: "oklch(0.5700 0.2078 25.3313)"
   cool-mist: "oklch(0.9383 0.0042 236.4993)"
   paper-white: "oklch(1.0000 0 0)"
   graphite: "oklch(0.3211 0 0)"
-  slate-muted: "oklch(0.5510 0.0234 264.3637)"
+  slate-muted: "oklch(0.4900 0.0234 264.3637)"
   hairline: "oklch(0.9022 0.0052 247.8822)"
   quiet-fill: "oklch(0.9846 0.0017 247.8389)"
   hover-fill: "oklch(0.9670 0.0029 264.5419)"
@@ -162,11 +162,12 @@ in `app/globals.css` maps them onto god-mode's own token names (`surface`,
 `accent`, `danger`, `seal`, …), and that adapter layer is the source of truth.
 
 ### Primary
-- **Fired Terracotta** (`--primary`, consumed as `--accent` / `--link`):
+- **Fired Terracotta** (`--primary`, consumed as `--accent`):
   primary buttons, links, the focus ring and the sidebar ring. It is reserved
-  for the one main action in a view. The same value is used in both themes, but
-  links on dark surfaces switch to a lighter terracotta (`--link` in `.dark`)
-  so they keep AA contrast.
+  for the one main action in a view. The fill value is the same in both themes and is
+  tuned for white text on top of it. Links have their own `--link` tone so
+  they keep AA as small text: a darker terracotta (oklch 0.50) in light, and
+  a lighter one (oklch 0.72) in `.dark`.
 
 ### Secondary
 - **Alarm Red** (`--destructive`, consumed as `--danger` / `--seal`): the live
@@ -203,6 +204,11 @@ decoration.
 **The One Warm Voice Rule.** Fired Terracotta is the only saturated hue in
 routine UI. Each view gets one primary button. Everything else is outline or
 ghost.
+
+**The Red Text Rule.** Red used as text (errors, "Armed", inline danger
+links, the seal face) uses `--danger-subtle-foreground`, never `--danger`.
+That tone passes AA on both themes; the `--danger` fill is tuned for white
+text on top of it (≈5:1) and is too dark to read as text in dark mode.
 
 **The Never Colour Alone Rule.** Every status pairs its colour with an icon and
 words. The target bar has a triangle icon plus "Every write is permanent", and

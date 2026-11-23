@@ -20,7 +20,7 @@ export function DropSchemaConfirm({ schema }: { schema: string }) {
     <div className="max-w-2xl">
       <div className="overflow-hidden rounded-md border border-danger-border bg-surface">
         <div className="flex items-center gap-2 border-b border-border bg-danger-subtle px-4 py-2.5">
-          <span className="text-xs font-semibold uppercase tracking-wider text-danger">Armed</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-danger-subtle-foreground">Armed</span>
           <span aria-hidden="true" className="text-danger-border">/</span>
           <span className="text-xs font-semibold uppercase tracking-wider text-danger-subtle-foreground">
             Irreversible

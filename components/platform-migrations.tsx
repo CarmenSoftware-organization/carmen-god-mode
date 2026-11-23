@@ -127,7 +127,7 @@ export function PlatformMigrations({
           ))}
         </datalist>
         {schemaStatus === "invalid" && schema.length > 0 && (
-          <p className="mt-1 text-xs font-medium text-danger">
+          <p className="mt-1 text-xs font-medium text-danger-subtle-foreground">
             Invalid schema name
           </p>
         )}

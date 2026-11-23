@@ -33,7 +33,7 @@ export function RowForm({
               {c.isNullable ? (
                 <span className="text-xs text-foreground-subtle">nullable</span>
               ) : (
-                <span className="text-xs text-danger">required</span>
+                <span className="text-xs text-danger-subtle-foreground">required</span>
               )}
             </label>
 

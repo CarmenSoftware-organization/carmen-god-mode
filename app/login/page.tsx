@@ -12,7 +12,7 @@ export default function LoginPage() {
               <span className="text-xl font-medium tracking-tight text-foreground">
                 CARMEN
               </span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-danger">God Mode</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-danger-subtle-foreground">God Mode</span>
             </div>
             <div className="space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Restricted console</p>
