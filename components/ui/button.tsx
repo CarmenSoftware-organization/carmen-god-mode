@@ -20,9 +20,10 @@ const variants = {
     "border border-border bg-surface text-foreground hover:bg-surface-hover",
   // Ghost (text-only, hover fill)
   ghost: "text-foreground-muted hover:bg-surface-hover hover:text-foreground",
-  // Subtle danger (text red)
+  // Subtle danger (text red). Uses the AA-tuned danger text tone: plain --danger
+  // is only ~3.8:1 as small text on a light surface.
   "danger-ghost":
-    "text-danger hover:bg-danger-subtle hover:text-danger",
+    "text-danger-subtle-foreground hover:bg-danger-subtle hover:text-danger-subtle-foreground",
   // Warning (amber, for soft-delete)
   warning:
     "bg-warning text-warning-foreground hover:bg-warning/90 shadow-sm",

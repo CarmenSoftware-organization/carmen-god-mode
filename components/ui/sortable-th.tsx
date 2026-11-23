@@ -24,9 +24,11 @@ export function compareCells(a: string | null | undefined, b: string | null | un
 }
 
 export function SortableTh<K extends string>({
-  label, sortKey, sort, onSort, className,
+  label, sortKey, sort, onSort, className, title,
 }: {
   label: string;
+  /** Plain-language explanation of the column, shown on hover. */
+  title?: string;
   sortKey: K;
   sort: SortState<K>;
   onSort: (key: K) => void;
@@ -42,13 +44,14 @@ export function SortableTh<K extends string>({
       <button
         type="button"
         onClick={() => onSort(sortKey)}
+        title={title}
         className={cn(
           "inline-flex items-center gap-1 uppercase tracking-wider transition-colors hover:text-foreground",
           active && "text-foreground",
         )}
       >
         {label}
-        <Icon className={cn("h-3 w-3", !active && "opacity-40")} aria-hidden="true" />
+        <Icon className={cn("h-3 w-3", !active && "opacity-70")} aria-hidden="true" />
       </button>
     </Th>
   );

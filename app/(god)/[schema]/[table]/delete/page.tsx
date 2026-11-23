@@ -34,7 +34,7 @@ export default async function DeletePage({
   return (
     <div className="space-y-4">
       <SchemaBanner schema={schema} />
-      <h1 className="text-base font-semibold tracking-tight">
+      <h1 className="text-2xl font-semibold tracking-tight">
         Delete from <span className="font-mono">{schema}.{table}</span>
       </h1>
       <ConfirmDelete schema={schema} table={table} pkJson={JSON.stringify(pk)} radius={radius}

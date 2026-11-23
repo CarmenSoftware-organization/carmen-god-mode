@@ -36,7 +36,7 @@ function Brand({ collapsed }: { collapsed: boolean }) {
     <Link href="/schemas" className="flex items-center gap-2 px-3 py-4" aria-label="Carmen God Mode — home">
       <span className="text-lg font-bold tracking-tight text-foreground">CARMEN</span>
       {!collapsed && (
-        <span className="rounded bg-danger px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-danger-foreground">
+        <span className="rounded bg-danger px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-danger-foreground">
           God Mode
         </span>
       )}
