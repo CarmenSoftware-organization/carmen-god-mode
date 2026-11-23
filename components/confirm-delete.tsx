@@ -41,6 +41,9 @@ export function ConfirmDelete({
   const pks: Record<string, unknown>[] = Array.isArray(parsed) ? parsed : [parsed];
   const running = state.phase === "running";
   const dropBlocked = !!poolWarning || !!sharedWarning;
+  // BU delete on a schema another live BU uses: only the registry config goes; the
+  // schema is kept. Pool mismatch takes precedence (the schema isn't on this host).
+  const keepsSharedSchema = isBusinessUnit && !!tenantSchema && !!sharedWarning && !poolWarning;
 
   function submit() {
     start("/api/ops/cascade-delete", {
@@ -100,14 +103,19 @@ export function ConfirmDelete({
       )}
 
       {/* Another live business unit still uses this schema */}
-      {sharedWarning && (
+      {keepsSharedSchema && (
+        <Alert variant="info" title="Deletes this business unit's registry config only">
+          Schema &quot;{tenantSchema}&quot; is kept. {sharedWarning}
+        </Alert>
+      )}
+      {sharedWarning && !keepsSharedSchema && (
         <Alert variant="danger" title="Tenant schema is shared">
           {sharedWarning} Dropping the schema is disabled; deleting the registry row is still allowed.
         </Alert>
       )}
 
       {/* Business unit schema drop */}
-      {isBusinessUnit && tenantSchema && (
+      {isBusinessUnit && tenantSchema && !keepsSharedSchema && (
         <label className="flex items-center gap-3 rounded-md border border-warning-border bg-warning-subtle p-3 text-sm text-warning-subtle-foreground aria-disabled:opacity-60" aria-disabled={dropBlocked}>
           <Checkbox
             checked={dropSchema && !dropBlocked}
@@ -144,7 +152,7 @@ export function ConfirmDelete({
         </div>
       )}
 
-      {isBusinessUnit && tenantSchema && (
+      {isBusinessUnit && tenantSchema && !keepsSharedSchema && (
         <p className="text-xs text-foreground-subtle">
           If you check the schema-drop box, the required phrase becomes the schema name.
         </p>
