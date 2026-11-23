@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Trash2, ArrowRight, AlertTriangle, Search } from "lucide-react";
+import { Trash2, ArrowRight, AlertTriangle, Search, Link2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { batchDeleteHref, stageBatchSelection } from "@/lib/batch-selection";
 import type { BusinessUnit } from "@/lib/registry";
@@ -166,6 +166,10 @@ export function BusinessUnitsTable({
               // only the registry config; the schema drop is refused downstream.
               const sharedWith = b.deletedAt && b.tenantSchema ? sharedSchemas[b.tenantSchema] ?? [] : [];
               const buOnly = sharedWith.length > 0;
+              // Other live BUs on the same schema, shown inline so it never hides behind a hover.
+              const sharesWith = b.tenantSchema
+                ? (sharedSchemas[b.tenantSchema] ?? []).filter((c) => c !== b.code)
+                : [];
               return (
                 <TR key={b.id} className={cn(isChecked && "bg-accent/5", b.deletedAt && "text-foreground-muted")}>
                   <Td className="w-10">
@@ -203,7 +207,7 @@ export function BusinessUnitsTable({
                       <Badge variant="neutral">Inactive</Badge>
                     )}
                   </Td>
-                  <Td className="font-mono text-xs">
+                  <Td className="max-w-none whitespace-normal font-mono text-xs">
                     {b.tenantSchema ?? (
                       <span className="text-foreground-subtle">none</span>
                     )}
@@ -212,6 +216,14 @@ export function BusinessUnitsTable({
                         <AlertTriangle className="h-3 w-3" aria-hidden="true" />
                         other database
                       </Badge>
+                    )}
+                    {sharesWith.length > 0 && (
+                      <div className="mt-1">
+                        <Badge variant="info" className="font-sans">
+                          <Link2 className="h-3 w-3" aria-hidden="true" />
+                          shared with {sharesWith.join(", ")}
+                        </Badge>
+                      </div>
                     )}
                   </Td>
                   <Td className="whitespace-nowrap text-right">
@@ -226,11 +238,10 @@ export function BusinessUnitsTable({
                       )}
                       <Link
                         href={`/${encodeURIComponent(system)}/tb_business_unit/delete?pk=${encodeURIComponent(JSON.stringify({ id: b.id }))}`}
-                        title={buOnly ? `Schema ${b.tenantSchema} is shared with ${sharedWith.join(", ")} and will be kept` : undefined}
                       >
                         <Button variant="danger-ghost" size="sm">
                           <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                          {buOnly ? "Delete BU only" : "Delete BU"}
+                          {buOnly ? "Delete config only" : "Delete BU"}
                         </Button>
                       </Link>
                     </div>
