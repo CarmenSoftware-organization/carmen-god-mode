@@ -15,11 +15,14 @@ export function BusinessUnitsTable({
   bus,
   system,
   poolMismatchIds = [],
+  sharedSchemas = {},
 }: {
   bus: BusinessUnit[];
   system: string;
   /** Business units whose registry pool is not the database this instance is connected to. */
   poolMismatchIds?: string[];
+  /** Tenant schema → codes of the live business units that use it. */
+  sharedSchemas?: Record<string, string[]>;
 }) {
   const mismatched = new Set(poolMismatchIds);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -92,6 +95,10 @@ export function BusinessUnitsTable({
             bus.map((b, i) => {
               const key = buKey(b);
               const isChecked = selected.has(key);
+              // A soft-deleted BU whose schema a live BU still uses: deleting it removes
+              // only the registry config; the schema drop is refused downstream.
+              const sharedWith = b.deletedAt && b.tenantSchema ? sharedSchemas[b.tenantSchema] ?? [] : [];
+              const buOnly = sharedWith.length > 0;
               return (
                 <TR key={b.id} className={cn(isChecked && "bg-accent/5", b.deletedAt && "text-foreground-muted")}>
                   <Td className="w-10">
@@ -135,10 +142,11 @@ export function BusinessUnitsTable({
                       )}
                       <Link
                         href={`/${encodeURIComponent(system)}/tb_business_unit/delete?pk=${encodeURIComponent(JSON.stringify({ id: b.id }))}`}
+                        title={buOnly ? `Schema ${b.tenantSchema} is shared with ${sharedWith.join(", ")} and will be kept` : undefined}
                       >
                         <Button variant="danger-ghost" size="sm">
                           <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span className="sr-only sm:not-sr-only">Delete</span>
+                          <span className="sr-only sm:not-sr-only">{buOnly ? "Delete BU only" : "Delete"}</span>
                         </Button>
                       </Link>
                     </div>

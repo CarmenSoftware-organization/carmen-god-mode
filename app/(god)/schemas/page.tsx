@@ -42,7 +42,12 @@ export default async function SchemasPage() {
         {/* Business units */}
         <section>
           <SectionLabel>Business units</SectionLabel>
-          <BusinessUnitsTable bus={bus} system={sel.system} poolMismatchIds={poolMismatchIds} />
+          <BusinessUnitsTable
+            bus={bus}
+            system={sel.system}
+            poolMismatchIds={poolMismatchIds}
+            sharedSchemas={Object.fromEntries(usage)}
+          />
         </section>
 
         {/* All schemas */}
@@ -54,7 +59,8 @@ export default async function SchemasPage() {
               <span className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Actions</span>
             </div>
             <ul>
-              {sel.allSchemas.map((s) => (
+              {/* Schemas a live BU uses are already listed in the Business units table above. */}
+              {sel.allSchemas.filter((s) => isProtectedSchema(s) || !usage.has(s)).map((s) => (
                 <li
                   key={s}
                   className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5 transition-colors last:border-0 hover:bg-surface-hover"
@@ -69,13 +75,6 @@ export default async function SchemasPage() {
                     {isProtectedSchema(s) ? (
                       <span className="text-xs font-medium uppercase tracking-wider text-foreground-subtle">
                         Protected
-                      </span>
-                    ) : usage.has(s) ? (
-                      <span
-                        className="text-xs font-medium uppercase tracking-wider text-foreground-subtle"
-                        title="Delete the business unit to remove this schema"
-                      >
-                        In use · {usage.get(s)!.join(", ")}
                       </span>
                     ) : (
                       <Link
