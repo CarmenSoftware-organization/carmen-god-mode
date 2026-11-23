@@ -21,6 +21,7 @@ vi.mock("@/lib/cascade", () => ({
 vi.mock("@/lib/registry", () => ({
   resolveTenantSchema: vi.fn(async () => null),
   resolveTenantSchemasForCluster: vi.fn(async () => []),
+  sharedSchemaReason: vi.fn(async () => null),
   listBusinessUnits: vi.fn(async () => []),
 }));
 vi.mock("@/lib/db-pool", () => ({

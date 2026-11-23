@@ -4,7 +4,7 @@ import { requireAuth } from "@/lib/session";
 import { readJsonObject, isOptionalString, isOptionalBoolean, isPlainObject } from "@/lib/request-body";
 import { executeCascade, executeCascadeMany } from "@/lib/cascade";
 import { requiredPhrase, phraseMatches } from "@/lib/delete-confirm";
-import { resolveTenantSchema, resolveTenantSchemasForCluster } from "@/lib/registry";
+import { resolveTenantSchema, resolveTenantSchemasForCluster, sharedSchemaReason } from "@/lib/registry";
 import { loadPoolsForBusinessUnits, loadPoolsForCluster, tenantDropBlockReason } from "@/lib/db-pool";
 import { streamOperation } from "@/lib/progress";
 
@@ -64,6 +64,13 @@ export async function POST(request: Request): Promise<Response> {
       : await loadPoolsForCluster(String(pks[0].id));
     const blocked = tenantDropBlockReason(pools);
     if (blocked) return Response.json({ error: blocked }, { status: 409 });
+    // Two BUs can share one schema (a recreated BU reuses its soft-deleted twin's);
+    // dropping it here would wipe the tenant that survives this delete.
+    const shared = await sharedSchemaReason(
+      dropSchemas,
+      isBusinessUnit ? { businessUnitId: String(pks[0].id) } : { clusterId: String(pks[0].id) },
+    );
+    if (shared) return Response.json({ error: shared }, { status: 409 });
   }
 
   const redirect = isBusinessUnit

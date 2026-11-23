@@ -18,6 +18,7 @@ export function ConfirmDelete({
   tenantSchema,
   orphanSchemas,
   poolWarning,
+  sharedWarning,
   requiredPhrase,
 }: {
   schema: string;
@@ -29,6 +30,8 @@ export function ConfirmDelete({
   orphanSchemas?: string[];
   /** Set when the registry points this target at a database other than the connected one. */
   poolWarning?: string | null;
+  /** Set when a live business unit outside this delete still uses the schema. */
+  sharedWarning?: string | null;
   requiredPhrase: string;
 }) {
   const { state, start } = useOperationStream();
@@ -37,13 +40,14 @@ export function ConfirmDelete({
   const parsed = JSON.parse(pkJson);
   const pks: Record<string, unknown>[] = Array.isArray(parsed) ? parsed : [parsed];
   const running = state.phase === "running";
+  const dropBlocked = !!poolWarning || !!sharedWarning;
 
   function submit() {
     start("/api/ops/cascade-delete", {
       schema,
       table,
       pks,
-      dropSchema,
+      dropSchema: dropSchema && !dropBlocked,
       confirm: requiredPhrase,
     });
   }
@@ -95,12 +99,19 @@ export function ConfirmDelete({
         </Alert>
       )}
 
+      {/* Another live business unit still uses this schema */}
+      {sharedWarning && (
+        <Alert variant="danger" title="Tenant schema is shared">
+          {sharedWarning} Dropping the schema is disabled; deleting the registry row is still allowed.
+        </Alert>
+      )}
+
       {/* Business unit schema drop */}
       {isBusinessUnit && tenantSchema && (
-        <label className="flex items-center gap-3 rounded-md border border-warning-border bg-warning-subtle p-3 text-sm text-warning-subtle-foreground aria-disabled:opacity-60" aria-disabled={!!poolWarning}>
+        <label className="flex items-center gap-3 rounded-md border border-warning-border bg-warning-subtle p-3 text-sm text-warning-subtle-foreground aria-disabled:opacity-60" aria-disabled={dropBlocked}>
           <Checkbox
-            checked={dropSchema && !poolWarning}
-            disabled={!!poolWarning}
+            checked={dropSchema && !dropBlocked}
+            disabled={dropBlocked}
             onChange={(e) => setDropSchema(e.target.checked)}
           />
           <span>
@@ -113,10 +124,10 @@ export function ConfirmDelete({
       {/* Orphan schema drop */}
       {orphanSchemas && orphanSchemas.length > 0 && (
         <div className="space-y-2">
-          <label className="flex items-start gap-3 rounded-md border border-warning-border bg-warning-subtle p-3 text-sm text-warning-subtle-foreground aria-disabled:opacity-60" aria-disabled={!!poolWarning}>
+          <label className="flex items-start gap-3 rounded-md border border-warning-border bg-warning-subtle p-3 text-sm text-warning-subtle-foreground aria-disabled:opacity-60" aria-disabled={dropBlocked}>
             <Checkbox
-              checked={dropSchema && !poolWarning}
-              disabled={!!poolWarning}
+              checked={dropSchema && !dropBlocked}
+              disabled={dropBlocked}
               onChange={(e) => setDropSchema(e.target.checked)}
             />
             <span>
