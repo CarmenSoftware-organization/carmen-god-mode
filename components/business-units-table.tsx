@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Trash2, ArrowRight, AlertTriangle } from "lucide-react";
+import { Trash2, ArrowRight, AlertTriangle, Search } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { batchDeleteHref, stageBatchSelection } from "@/lib/batch-selection";
 import type { BusinessUnit } from "@/lib/registry";
@@ -9,6 +9,7 @@ import { Table, THead, TBody, TR, Th, Td } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SortableTh, compareCells, nextSort, type SortState } from "@/components/ui/sortable-th";
 
@@ -33,6 +34,8 @@ export function BusinessUnitsTable({
   const mismatched = new Set(poolMismatchIds);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [sort, setSort] = useState<SortState<SortKey>>(null);
+  const [query, setQuery] = useState("");
+  const [cleanupOnly, setCleanupOnly] = useState(false);
 
   function sortValue(b: BusinessUnit, key: SortKey): string | null {
     switch (key) {
@@ -44,10 +47,16 @@ export function BusinessUnitsTable({
       case "schema": return b.tenantSchema;
     }
   }
-  // Unsorted keeps the server order (by code).
+  // Filter first, then sort. Unsorted keeps the server order (by code).
+  const q = query.trim().toLowerCase();
+  const visible = bus.filter((b) => {
+    if (cleanupOnly && !b.deletedAt && b.isActive) return false;
+    if (!q) return true;
+    return [b.code, b.name, b.tenantSchema ?? ""].some((v) => v.toLowerCase().includes(q));
+  });
   const rows = sort
-    ? [...bus].sort((a, b) => compareCells(sortValue(a, sort.key), sortValue(b, sort.key), sort.dir))
-    : bus;
+    ? [...visible].sort((a, b) => compareCells(sortValue(a, sort.key), sortValue(b, sort.key), sort.dir))
+    : visible;
   const onSort = (key: SortKey) => setSort((prev) => nextSort(prev, key));
 
   function buKey(b: BusinessUnit): string {
@@ -61,32 +70,59 @@ export function BusinessUnitsTable({
       return next;
     });
   }
+  // Only rows the filter shows can be acted on: a selection hidden by the filter
+  // must never ride along into a bulk delete the operator can't see.
+  const visibleKeys = rows.map(buKey);
+  const effective = visibleKeys.filter((k) => selected.has(k));
+  const allSelected = visibleKeys.length > 0 && effective.length === visibleKeys.length;
   function toggleAll() {
-    setSelected((prev) =>
-      prev.size === bus.length
-        ? new Set()
-        : new Set(bus.map(buKey)),
-    );
+    setSelected(allSelected ? new Set() : new Set(visibleKeys));
   }
 
-  const selectedPks = [...selected].map((k) => JSON.parse(k) as { id: string });
+  const selectedPks = effective.map((k) => JSON.parse(k) as { id: string });
   const batchHref = batchDeleteHref(system, "tb_business_unit");
-  const allSelected = bus.length > 0 && selected.size === bus.length;
 
   return (
     <div className="space-y-3">
+      {/* Filter */}
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="relative w-80">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground-subtle" aria-hidden="true" />
+          <Input
+            type="search"
+            aria-label="Filter business units"
+            placeholder="Filter by code, name or schema"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground-muted">
+          <Checkbox checked={cleanupOnly} onChange={(e) => setCleanupOnly(e.target.checked)} />
+          Deleted or inactive only
+        </label>
+        {(q || cleanupOnly) && (
+          <span className="text-sm text-foreground-muted tabular-nums">
+            {rows.length} of {bus.length} shown
+          </span>
+        )}
+      </div>
+
       {/* Bulk action bar */}
-      {selected.size > 0 && (
+      {effective.length > 0 && (
         <div className="flex items-center gap-3 rounded-md border border-danger-border bg-danger-subtle px-3 py-2">
           <span className="text-sm font-medium text-danger-subtle-foreground">
-            {selected.size} selected
+            {effective.length} selected
           </span>
           <Link href={batchHref} onClick={() => stageBatchSelection(system, "tb_business_unit", selectedPks)}>
             <Button variant="danger" size="sm">
               <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-              Delete {selected.size}
+              Review {effective.length} for deletion
             </Button>
           </Link>
+          <span className="text-sm text-danger-subtle-foreground">
+            Nothing is deleted yet: the next page lists every row this removes.
+          </span>
         </div>
       )}
 
@@ -103,10 +139,10 @@ export function BusinessUnitsTable({
             <SortableTh label="Code" sortKey="code" sort={sort} onSort={onSort} />
             <SortableTh label="Name" sortKey="name" sort={sort} onSort={onSort} />
             <SortableTh label="Cluster" sortKey="cluster" sort={sort} onSort={onSort} />
-            <SortableTh label="Method" sortKey="method" sort={sort} onSort={onSort} />
+            <SortableTh label="Method" sortKey="method" sort={sort} onSort={onSort} title="Inventory costing method (FIFO or average cost)" />
             <SortableTh label="Active" sortKey="status" sort={sort} onSort={onSort} />
-            <SortableTh label="Tenant schema" sortKey="schema" sort={sort} onSort={onSort} />
-            <Th className="w-28 text-right">Actions</Th>
+            <SortableTh label="Tenant schema" sortKey="schema" sort={sort} onSort={onSort} title="The Postgres schema that holds this business unit's inventory data" />
+            <Th className="text-right">Actions</Th>
           </TR>
         </THead>
         <TBody>
@@ -114,6 +150,12 @@ export function BusinessUnitsTable({
             <tr>
               <td colSpan={8}>
                 <EmptyState icon="package" title="No business units" />
+              </td>
+            </tr>
+          ) : rows.length === 0 ? (
+            <tr>
+              <td colSpan={8}>
+                <EmptyState icon="package" title="No business units match the filter" />
               </td>
             </tr>
           ) : (
@@ -155,7 +197,8 @@ export function BusinessUnitsTable({
                     {b.deletedAt ? (
                       <Badge variant="danger">Deleted</Badge>
                     ) : b.isActive ? (
-                      <Badge variant="success">Active</Badge>
+                      // The normal case stays quiet so Deleted/Inactive stand out.
+                      <span className="text-foreground-muted">Active</span>
                     ) : (
                       <Badge variant="neutral">Inactive</Badge>
                     )}
@@ -171,13 +214,13 @@ export function BusinessUnitsTable({
                       </Badge>
                     )}
                   </Td>
-                  <Td className="w-28 text-right">
+                  <Td className="whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-1">
                       {b.tenantSchema && (
                         <Link href={`/${encodeURIComponent(b.tenantSchema)}/tables`}>
                           <Button variant="ghost" size="sm">
                             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
-                            <span className="sr-only sm:not-sr-only">Open</span>
+                            Open
                           </Button>
                         </Link>
                       )}
@@ -187,7 +230,7 @@ export function BusinessUnitsTable({
                       >
                         <Button variant="danger-ghost" size="sm">
                           <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                          <span className="sr-only sm:not-sr-only">{buOnly ? "Delete BU only" : "Delete"}</span>
+                          {buOnly ? "Delete BU only" : "Delete BU"}
                         </Button>
                       </Link>
                     </div>

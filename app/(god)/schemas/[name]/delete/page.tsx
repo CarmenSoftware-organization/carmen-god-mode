@@ -21,7 +21,7 @@ export default async function DropSchemaPage({
     return (
       <div className="space-y-4">
         <SchemaBanner schema={schema} />
-        <h1 className="text-base font-semibold tracking-tight">Cannot drop schema</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Cannot drop schema</h1>
         <p className="max-w-prose text-sm text-foreground-muted">
           <span className="font-mono">{schema}</span> is {reason}. It is protected and cannot
           be dropped.
@@ -36,7 +36,7 @@ export default async function DropSchemaPage({
   return (
     <div className="space-y-4">
       <SchemaBanner schema={schema} />
-      <h1 className="text-base font-semibold tracking-tight">
+      <h1 className="text-2xl font-semibold tracking-tight">
         Drop schema <span className="font-mono">{schema}</span>
       </h1>
       <DropSchemaConfirm schema={schema} />

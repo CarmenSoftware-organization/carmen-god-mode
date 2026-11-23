@@ -44,6 +44,11 @@ export function ConfirmDelete({
   // BU delete on a schema another live BU uses: only the registry config goes; the
   // schema is kept. Pool mismatch takes precedence (the schema isn't on this host).
   const keepsSharedSchema = isBusinessUnit && !!tenantSchema && !!sharedWarning && !poolWarning;
+  // The server demands the schema name, not DELETE, for a single BU delete that also
+  // drops its schema (app/api/ops/cascade-delete). The page only knows the base
+  // phrase, so the switch has to happen here or that delete is always refused.
+  const dropsBuSchema = isBusinessUnit && !!tenantSchema && dropSchema && !dropBlocked && !keepsSharedSchema;
+  const phrase = dropsBuSchema ? tenantSchema! : requiredPhrase;
 
   function submit() {
     start("/api/ops/cascade-delete", {
@@ -51,7 +56,7 @@ export function ConfirmDelete({
       table,
       pks,
       dropSchema: dropSchema && !dropBlocked,
-      confirm: requiredPhrase,
+      confirm: phrase,
     });
   }
 
@@ -75,7 +80,8 @@ export function ConfirmDelete({
         )}
       </Alert>
 
-      {/* Blast radius summary table */}
+      {/* Blast radius summary table: capped so a wide radius can't push the confirm off-screen */}
+      <div className="max-h-72 overflow-y-auto rounded-md border border-border">
       <Table>
         <THead>
           <TR>
@@ -94,6 +100,7 @@ export function ConfirmDelete({
           ))}
         </TBody>
       </Table>
+      </div>
 
       {/* Registry points somewhere this instance is not connected to */}
       {poolWarning && (
@@ -152,14 +159,16 @@ export function ConfirmDelete({
         </div>
       )}
 
-      {isBusinessUnit && tenantSchema && !keepsSharedSchema && (
-        <p className="text-xs text-foreground-subtle">
-          If you check the schema-drop box, the required phrase becomes the schema name.
+      {isBusinessUnit && tenantSchema && !keepsSharedSchema && !dropBlocked && (
+        <p className="text-sm text-foreground-muted">
+          {dropsBuSchema
+            ? <>Because the schema drop is checked, type the schema name <code className="font-mono text-xs">{tenantSchema}</code> instead of DELETE.</>
+            : <>Checking the schema-drop box changes the phrase from DELETE to the schema name.</>}
         </p>
       )}
 
       <SealConfirm
-        requiredPhrase={requiredPhrase}
+        requiredPhrase={phrase}
         onStamp={submit}
         disabled={radius.truncated}
         pending={running}

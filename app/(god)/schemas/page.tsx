@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Lock, Trash2 } from "lucide-react";
 import { BusinessUnitsTable } from "@/components/business-units-table";
 import { listBusinessUnits, listClusters, listSelectableSchemas, loadSchemaUsage } from "@/lib/registry";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { PageHeader, SectionLabel } from "@/components/ui/page-header";
 import { isProtectedSchema } from "@/lib/drop-schema";
 import { loadAllPools, poolMatches, parseConnectionIdentity } from "@/lib/db-pool";
@@ -27,7 +28,7 @@ export default async function SchemasPage() {
       <PageHeader
         rubric="Overview"
         title="Schemas"
-        lede="Pick a target schema to inspect its tables and rows, or manage business units."
+        lede="Open a schema to browse and edit its tables. Deleting a business unit removes its registry config; dropping its tenant schema, which holds its inventory data, is a separate opt-in on the next page."
       />
 
       <div className="space-y-8">
@@ -59,11 +60,11 @@ export default async function SchemasPage() {
           label="Other schemas"
           schemas={sel.allSchemas.filter((s) => !isProtectedSchema(s) && !usage.has(s))}
           action={(s) => (
-            <Link
-              href={`/schemas/${encodeURIComponent(s)}/delete`}
-              className="text-xs font-semibold uppercase tracking-wider text-danger transition-colors hover:text-danger-hover"
-            >
-              Delete
+            <Link href={`/schemas/${encodeURIComponent(s)}/delete`}>
+              <Button variant="danger-ghost" size="sm">
+                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                Drop schema
+              </Button>
             </Link>
           )}
         />
@@ -73,9 +74,10 @@ export default async function SchemasPage() {
           label="Protected schemas"
           schemas={sel.allSchemas.filter(isProtectedSchema)}
           action={() => (
-            <span className="text-xs font-medium uppercase tracking-wider text-foreground-subtle">
+            <Badge variant="neutral">
+              <Lock className="h-3 w-3" aria-hidden="true" />
               Protected
-            </span>
+            </Badge>
           )}
         />
       </div>
@@ -104,7 +106,7 @@ function SchemaList({
                 className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5 transition-colors last:border-0 hover:bg-surface-hover"
               >
                 <Link href={`/${encodeURIComponent(s)}/tables`} className="flex min-w-0 flex-1 items-center gap-2">
-                  <span className="truncate font-mono text-[13px] text-foreground">{s}</span>
+                  <span className="truncate font-mono text-xs text-foreground">{s}</span>
                 </Link>
                 <div className="flex shrink-0 items-center gap-4">
                   {action(s)}

@@ -25,14 +25,14 @@ test("rows render with code and name", async () => {
 test("no Delete-selected control until a row is checked", async () => {
   const { BusinessUnitsTable } = await import("@/components/business-units-table");
   render(<BusinessUnitsTable bus={bus} system="CARMEN_SYSTEM" />);
-  expect(screen.queryByText(/Delete .* selected/)).not.toBeInTheDocument();
+  expect(screen.queryByText(/for deletion/)).not.toBeInTheDocument();
 });
 
-test("checking a row reveals Delete N selected with the delete-batch href", async () => {
+test("checking a row reveals Review N for deletion with the delete-batch href", async () => {
   const { BusinessUnitsTable } = await import("@/components/business-units-table");
   render(<BusinessUnitsTable bus={bus} system="CARMEN_SYSTEM" />);
   fireEvent.click(screen.getByLabelText("Select row 1"));
-  const link = screen.getByText("Delete 1").closest("a")!;
+  const link = screen.getByText("Review 1 for deletion").closest("a")!;
   expect(link).toHaveAttribute(
     "href",
     "/CARMEN_SYSTEM/tb_business_unit/delete-batch",
@@ -43,14 +43,14 @@ test("select-all checks every business unit", async () => {
   const { BusinessUnitsTable } = await import("@/components/business-units-table");
   render(<BusinessUnitsTable bus={bus} system="CARMEN_SYSTEM" />);
   fireEvent.click(screen.getByLabelText("Select all"));
-  expect(screen.getByText("Delete 2")).toBeInTheDocument();
+  expect(screen.getByText("Review 2 for deletion")).toBeInTheDocument();
 });
 
 test("per-row delete and open links preserved", async () => {
   const { BusinessUnitsTable } = await import("@/components/business-units-table");
   render(<BusinessUnitsTable bus={bus} system="CARMEN_SYSTEM" />);
   expect(screen.getByText("Open").closest("a")).toHaveAttribute("href", "/tenant_a/tables");
-  const del = screen.getAllByText("Delete")[0].closest("a")!;
+  const del = screen.getAllByText("Delete BU")[0].closest("a")!;
   expect(del).toHaveAttribute(
     "href",
     `/CARMEN_SYSTEM/tb_business_unit/delete?pk=${encodeURIComponent(JSON.stringify({ id: "11" }))}`,
