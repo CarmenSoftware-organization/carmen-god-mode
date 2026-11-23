@@ -10,6 +10,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { SortableTh, compareCells, nextSort, type SortState } from "@/components/ui/sortable-th";
+
+type SortKey = "code" | "name" | "cluster" | "status" | "schema";
 
 export function BusinessUnitsTable({
   bus,
@@ -29,6 +32,22 @@ export function BusinessUnitsTable({
 }) {
   const mismatched = new Set(poolMismatchIds);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [sort, setSort] = useState<SortState<SortKey>>(null);
+
+  function sortValue(b: BusinessUnit, key: SortKey): string | null {
+    switch (key) {
+      case "code": return b.code;
+      case "name": return b.name;
+      case "cluster": return b.clusterId ? clusters[b.clusterId]?.code ?? null : null;
+      case "status": return b.deletedAt ? "Deleted" : b.isActive ? "Active" : "Inactive";
+      case "schema": return b.tenantSchema;
+    }
+  }
+  // Unsorted keeps the server order (by code).
+  const rows = sort
+    ? [...bus].sort((a, b) => compareCells(sortValue(a, sort.key), sortValue(b, sort.key), sort.dir))
+    : bus;
+  const onSort = (key: SortKey) => setSort((prev) => nextSort(prev, key));
 
   function buKey(b: BusinessUnit): string {
     return JSON.stringify({ id: b.id });
@@ -80,11 +99,11 @@ export function BusinessUnitsTable({
                 onChange={toggleAll}
               />
             </Th>
-            <Th>Code</Th>
-            <Th>Name</Th>
-            <Th>Cluster</Th>
-            <Th>Active</Th>
-            <Th>Tenant schema</Th>
+            <SortableTh label="Code" sortKey="code" sort={sort} onSort={onSort} />
+            <SortableTh label="Name" sortKey="name" sort={sort} onSort={onSort} />
+            <SortableTh label="Cluster" sortKey="cluster" sort={sort} onSort={onSort} />
+            <SortableTh label="Active" sortKey="status" sort={sort} onSort={onSort} />
+            <SortableTh label="Tenant schema" sortKey="schema" sort={sort} onSort={onSort} />
             <Th className="w-28 text-right">Actions</Th>
           </TR>
         </THead>
@@ -96,7 +115,7 @@ export function BusinessUnitsTable({
               </td>
             </tr>
           ) : (
-            bus.map((b, i) => {
+            rows.map((b, i) => {
               const key = buKey(b);
               const isChecked = selected.has(key);
               // A soft-deleted BU whose schema a live BU still uses: deleting it removes
