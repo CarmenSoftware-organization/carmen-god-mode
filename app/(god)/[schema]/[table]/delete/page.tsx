@@ -34,9 +34,18 @@ export default async function DeletePage({
   return (
     <div className="space-y-4">
       <SchemaBanner schema={schema} />
-      <h1 className="text-2xl font-semibold tracking-tight">
-        Delete from <span className="font-mono">{schema}.{table}</span>
-      </h1>
+      {isBusinessUnit ? (
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Delete business unit</h1>
+          <p className="mt-1 font-mono text-xs text-foreground-muted">
+            {schema}.{table}{tenantSchema ? ` · tenant schema ${tenantSchema}` : ""}
+          </p>
+        </div>
+      ) : (
+        <h1 className="text-2xl font-semibold tracking-tight">
+          Delete from <span className="font-mono">{schema}.{table}</span>
+        </h1>
+      )}
       <ConfirmDelete schema={schema} table={table} pkJson={JSON.stringify(pk)} radius={radius}
         isBusinessUnit={isBusinessUnit} tenantSchema={tenantSchema}
         orphanSchemas={orphanSchemas} poolWarning={poolWarning} sharedWarning={sharedWarning}

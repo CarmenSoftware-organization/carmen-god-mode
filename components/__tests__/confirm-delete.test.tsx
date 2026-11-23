@@ -65,7 +65,8 @@ test("a pool warning blocks the schema drop while leaving the row delete availab
   // The blast-radius callout is also role="alert", so match this one by its title.
   expect(screen.getByText("Tenant schema lives on another database")).toBeInTheDocument();
   expect(screen.getByText(/prod\.example\.com:5432\/carmen/)).toBeInTheDocument();
-  expect(screen.getByRole("checkbox")).toBeDisabled();
+  expect(screen.getByRole("radio", { name: /all tenant data/i })).toBeDisabled();
+  expect(screen.getByRole("radio", { name: /configuration only/i })).toBeChecked();
 });
 
 test("without a pool warning the schema drop stays operable", async () => {
@@ -73,5 +74,5 @@ test("without a pool warning the schema drop stays operable", async () => {
   render(<ConfirmDelete schema="CARMEN_SYSTEM" table="tb_business_unit" pkJson={JSON.stringify({ id: "1" })}
     radius={radius} isBusinessUnit tenantSchema="tenant_here" requiredPhrase="DELETE" />);
   expect(screen.queryByText("Tenant schema lives on another database")).not.toBeInTheDocument();
-  expect(screen.getByRole("checkbox")).toBeEnabled();
+  expect(screen.getByRole("radio", { name: /all tenant data/i })).toBeEnabled();
 });
