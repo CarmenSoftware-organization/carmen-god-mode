@@ -24,6 +24,10 @@ const variants = {
   // is only ~3.8:1 as small text on a light surface.
   "danger-ghost":
     "text-danger-subtle-foreground hover:bg-danger-subtle hover:text-danger-subtle-foreground",
+  // Quiet danger: neutral at rest, red only on hover/focus. For destructive
+  // actions repeated on every row, so red keeps meaning "danger" (DESIGN.md).
+  "danger-quiet":
+    "text-foreground-muted hover:bg-danger-subtle hover:text-danger-subtle-foreground focus-visible:text-danger-subtle-foreground",
   // Warning (amber, for soft-delete)
   warning:
     "bg-warning text-warning-foreground hover:bg-warning/90 shadow-sm",

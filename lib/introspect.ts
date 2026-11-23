@@ -94,3 +94,30 @@ export async function listForeignKeys(schema: string): Promise<ForeignKey[]> {
     onDelete: ON_DELETE[r.on_delete] ?? "NO ACTION",
   }));
 }
+
+export type SchemaFootprint = { tables: number; estimatedRows: number; size: string };
+
+/**
+ * What a schema holds, for showing before a DROP: table count, planner-estimated
+ * rows (reltuples, so approximate and 0 until analyzed) and on-disk size.
+ * Read-only catalog queries; schemas with no tables map to zeros.
+ */
+export async function schemaFootprints(schemas: string[]): Promise<Map<string, SchemaFootprint>> {
+  const out = new Map<string, SchemaFootprint>();
+  if (schemas.length === 0) return out;
+  const rows = (await getSql().unsafe(
+    `SELECT n.nspname AS schema,
+            count(c.oid) FILTER (WHERE c.relkind IN ('r','p'))::int AS tables,
+            COALESCE(sum(GREATEST(c.reltuples, 0)) FILTER (WHERE c.relkind IN ('r','p')), 0)::bigint AS estimated_rows,
+            pg_size_pretty(COALESCE(sum(pg_total_relation_size(c.oid)) FILTER (WHERE c.relkind IN ('r','p','m')), 0)) AS size
+     FROM pg_namespace n
+     LEFT JOIN pg_class c ON c.relnamespace = n.oid
+     WHERE n.nspname = ANY($1::text[])
+     GROUP BY n.nspname`,
+    [schemas] as unknown as string[],
+  )) as unknown as { schema: string; tables: number; estimated_rows: string | number; size: string }[];
+  for (const r of rows) {
+    out.set(r.schema, { tables: r.tables, estimatedRows: Number(r.estimated_rows), size: r.size });
+  }
+  return out;
+}

@@ -136,11 +136,11 @@ export function BusinessUnitsTable({
                 onChange={toggleAll}
               />
             </Th>
-            <SortableTh label="Code" sortKey="code" sort={sort} onSort={onSort} />
+            <SortableTh label="Code" sortKey="code" sort={sort} onSort={onSort} className="w-36" />
             <SortableTh label="Name" sortKey="name" sort={sort} onSort={onSort} />
-            <SortableTh label="Cluster" sortKey="cluster" sort={sort} onSort={onSort} />
-            <SortableTh label="Method" sortKey="method" sort={sort} onSort={onSort} title="Inventory costing method (FIFO or average cost)" />
-            <SortableTh label="Active" sortKey="status" sort={sort} onSort={onSort} />
+            <SortableTh label="Cluster" sortKey="cluster" sort={sort} onSort={onSort} className="w-32" />
+            <SortableTh label="Method" sortKey="method" sort={sort} onSort={onSort} className="w-52" title="Inventory costing method (FIFO or average cost)" />
+            <SortableTh label="Active" sortKey="status" sort={sort} onSort={onSort} className="w-24" />
             <SortableTh label="Tenant schema" sortKey="schema" sort={sort} onSort={onSort} title="The Postgres schema that holds this business unit's inventory data" />
             <Th className="text-right">Actions</Th>
           </TR>
@@ -156,6 +156,11 @@ export function BusinessUnitsTable({
             <tr>
               <td colSpan={8}>
                 <EmptyState icon="package" title="No business units match the filter" />
+                <div className="-mt-6 flex justify-center pb-6">
+                  <Button variant="outline" size="sm" onClick={() => { setQuery(""); setCleanupOnly(false); }}>
+                    Clear filter
+                  </Button>
+                </div>
               </td>
             </tr>
           ) : (
@@ -229,7 +234,7 @@ export function BusinessUnitsTable({
                   <Td className="whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-1">
                       {b.tenantSchema && (
-                        <Link href={`/${encodeURIComponent(b.tenantSchema)}/tables`}>
+                        <Link href={`/${encodeURIComponent(b.tenantSchema)}/tables`} aria-label={`Open ${b.tenantSchema}`}>
                           <Button variant="ghost" size="sm">
                             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                             Open
@@ -238,8 +243,9 @@ export function BusinessUnitsTable({
                       )}
                       <Link
                         href={`/${encodeURIComponent(system)}/tb_business_unit/delete?pk=${encodeURIComponent(JSON.stringify({ id: b.id }))}`}
+                        aria-label={`${buOnly ? "Delete config only for" : "Delete BU"} ${b.code}`}
                       >
-                        <Button variant="danger-ghost" size="sm">
+                        <Button variant={isChecked ? "danger-ghost" : "danger-quiet"} size="sm">
                           <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                           {buOnly ? "Delete config only" : "Delete BU"}
                         </Button>

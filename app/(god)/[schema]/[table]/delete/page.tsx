@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { env } from "@/lib/env";
 import { computeBlastRadius } from "@/lib/cascade";
-import { resolveTenantSchema, resolveTenantSchemasForCluster, sharedSchemaReason } from "@/lib/registry";
+import { listBusinessUnits, resolveTenantSchema, resolveTenantSchemasForCluster, sharedSchemaReason } from "@/lib/registry";
 import { loadPoolsForBusinessUnits, loadPoolsForCluster, tenantDropBlockReason } from "@/lib/db-pool";
 import { requiredPhrase } from "@/lib/delete-confirm";
 import { ConfirmDelete } from "@/components/confirm-delete";
@@ -31,12 +31,16 @@ export default async function DeletePage({
     ? await sharedSchemaReason(orphanSchemas ?? [], { clusterId: String(pk.id) })
     : null;
   const radius = await computeBlastRadius(schema, table, pk);
+  const bu = isBusinessUnit ? (await listBusinessUnits()).find((b) => b.id === String(pk.id)) ?? null : null;
   return (
     <div className="space-y-4">
       <SchemaBanner schema={schema} />
       {isBusinessUnit ? (
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Delete business unit</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Delete business unit{bu && <> <span className="font-mono">{bu.code}</span></>}
+          </h1>
+          {bu && <p className="mt-1 text-sm text-foreground-muted">{bu.name}</p>}
           <p className="mt-1 font-mono text-xs text-foreground-muted">
             {schema}.{table}{tenantSchema ? ` · tenant schema ${tenantSchema}` : ""}
           </p>

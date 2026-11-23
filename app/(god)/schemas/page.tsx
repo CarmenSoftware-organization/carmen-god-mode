@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronRight, Lock, Trash2 } from "lucide-react";
 import { BusinessUnitsTable } from "@/components/business-units-table";
 import { listBusinessUnits, listClusters, listSelectableSchemas, loadSchemaUsage } from "@/lib/registry";
+import { schemaFootprints } from "@/lib/introspect";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader, SectionLabel } from "@/components/ui/page-header";
@@ -19,6 +20,8 @@ export default async function SchemasPage() {
     clusterRows.map((c) => [c.id, { code: c.code, name: c.name, deleted: c.deletedAt !== null }]),
   );
   // pools === null on a registry that predates the pool split: nothing to flag.
+  const otherSchemas = sel.allSchemas.filter((s) => !isProtectedSchema(s) && !usage.has(s));
+  const footprints = await schemaFootprints(otherSchemas);
   const connected = parseConnectionIdentity(env().databaseUrl);
   const poolMismatchIds = (pools ?? [])
     .filter((p) => p.dbSchema && !poolMatches(p.pool, connected))
@@ -58,10 +61,16 @@ export default async function SchemasPage() {
         {/* Unprotected schemas a live BU doesn't use (those are in the table above). */}
         <SchemaList
           label="Other schemas"
-          schemas={sel.allSchemas.filter((s) => !isProtectedSchema(s) && !usage.has(s))}
+          hint="No business unit uses these schemas. Dropping one deletes all of its data."
+          schemas={otherSchemas}
+          detail={(s) => {
+            const f = footprints.get(s);
+            if (!f) return null;
+            return f.tables === 0 ? "empty" : `${f.tables} tables · ${f.size}`;
+          }}
           action={(s) => (
-            <Link href={`/schemas/${encodeURIComponent(s)}/delete`}>
-              <Button variant="danger-ghost" size="sm">
+            <Link href={`/schemas/${encodeURIComponent(s)}/delete`} aria-label={`Drop schema ${s}`}>
+              <Button variant="danger-quiet" size="sm">
                 <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 Drop schema
               </Button>
@@ -72,6 +81,7 @@ export default async function SchemasPage() {
         {/* System, public and PROTECTED_SCHEMAS: never droppable from here. */}
         <SchemaList
           label="Protected schemas"
+          hint="The system schema, public, and anything listed in PROTECTED_SCHEMAS. You can browse them; they can't be dropped here."
           schemas={sel.allSchemas.filter(isProtectedSchema)}
           action={() => (
             <Badge variant="neutral">
@@ -86,11 +96,19 @@ export default async function SchemasPage() {
 }
 
 function SchemaList({
-  label, schemas, action,
-}: { label: string; schemas: string[]; action: (schema: string) => React.ReactNode }) {
+  label, hint, schemas, detail, action,
+}: {
+  label: string;
+  hint?: string;
+  schemas: string[];
+  /** Optional muted summary shown before the action (e.g. table count and size). */
+  detail?: (schema: string) => string | null;
+  action: (schema: string) => React.ReactNode;
+}) {
   return (
     <section>
-      <SectionLabel>{label}</SectionLabel>
+      <SectionLabel className={hint ? "mb-1" : undefined}>{label}</SectionLabel>
+      {hint && <p className="mb-3 text-sm text-foreground-muted">{hint}</p>}
       <div className="overflow-hidden rounded-md border border-border bg-surface">
         <div className="flex items-center justify-between border-b border-border px-4 py-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Schema</span>
@@ -109,6 +127,9 @@ function SchemaList({
                   <span className="truncate font-mono text-xs text-foreground">{s}</span>
                 </Link>
                 <div className="flex shrink-0 items-center gap-4">
+                  {detail?.(s) && (
+                    <span className="text-xs tabular-nums text-foreground-muted">{detail(s)}</span>
+                  )}
                   {action(s)}
                   <ChevronRight className="h-3.5 w-3.5 text-foreground-subtle" aria-hidden="true" />
                 </div>
